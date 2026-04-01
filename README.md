@@ -1,2 +1,2 @@
 NPM: 24782001
-NAAMA: Aan Krisnawati
+NAMA: Aan Krisnawati
