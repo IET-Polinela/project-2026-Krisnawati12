@@ -1,1 +1,23 @@
-<h1>Selamat Datang di kota Bandar Lampung</h1>
+<h2>Daftar Laporan Smart City</h2>
+<a href="{% url 'main_app:add_report' %}">[+] Tambah Laporan</a>
+<table border="1" style="margin-top: 10px;">
+    <tr>
+        <th>Judul</th>
+        <th>Kategori</th>
+        <th>Lokasi</th>
+        <th>Aksi</th>
+    </tr>
+    {% for r in reports %}
+    <tr>
+        <td>{{ r.title }}</td>
+        <td>{{ r.category }}</td>
+        <td>{{ r.location }}</td>
+        <td>
+            <a href="{% url 'main_app:update_report' r.pk %}">Edit</a> | 
+            <a href="{% url 'main_app:delete_report' r.pk %}">Hapus</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Belum ada data.</td></tr>
+    {% endfor %}
+</table>

@@ -3,6 +3,7 @@ Django settings for _24782001_iet_2026 project.
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Aplikasi Lab 2
+    # Aplikasi Lab kamu
     'main_app',
     'about',
     'contacts',
@@ -45,7 +46,7 @@ ROOT_URLCONF = '_24782001_iet_2026.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -59,11 +60,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = '_24782001_iet_2026.wsgi.application'
 
-# Database
+# Database Configuration (PostgreSQL)
+# 1. Pastikan database 'smartcity_db' sudah dibuat di pgAdmin
+# 2. Ganti 'PASSWORD' sesuai password yang kamu buat pas install PostgreSQL
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'smartcity_db',
+        'USER': 'postgres',
+        'PASSWORD': 'krisnaijo', # <--- GANTI INI sesuai password kamu!
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
