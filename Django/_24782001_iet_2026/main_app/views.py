@@ -1,39 +1,45 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views import View
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
 from .models import Report
-from .forms import ReportForm
 
-# READ: Lihat semua data di home.html
-def home(request):
-    reports = Report.objects.all()
-    return render(request, 'main_app/home.html', {'reports': reports})
+# 1. Menampilkan Daftar Laporan (Ganti 'home')
+class ReportListView(ListView):
+    model = Report
+    template_name = 'main_app/home.html'
+    context_object_name = 'reports'
 
-# CREATE: Tambah data laporan
-def add_report(request):
-    if request.method == "POST":
-        form = ReportForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('main_app:home')
-    else:
-        form = ReportForm()
-    return render(request, 'main_app/add_report.html', {'form': form})
+# 2. Menampilkan Detail (Baru di Lab 4)
+class ReportDetailView(DetailView):
+    model = Report
+    template_name = 'main_app/report_detail.html'
 
-# UPDATE: Edit data
-def update_report(request, pk):
-    report = get_object_or_404(Report, pk=pk)
-    if request.method == "POST":
-        form = ReportForm(request.POST, instance=report)
-        if form.is_valid():
-            form.save()
-            return redirect('main_app:home')
-    else:
-        form = ReportForm(instance=report)
-    return render(request, 'main_app/add_report.html', {'form': form})
+# 3. Tambah Laporan (Ganti 'add_report')
+class ReportCreateView(CreateView):
+    model = Report
+    fields = ['title', 'category', 'description', 'location']
+    template_name = 'main_app/add_report.html'
+    success_url = reverse_lazy('main_app:home')
 
-# DELETE: Hapus data
-def delete_report(request, pk):
-    report = get_object_or_404(Report, pk=pk)
-    if request.method == "POST":
-        report.delete()
+# 4. Update Laporan (Ganti 'update_report')
+class ReportUpdateView(UpdateView):
+    model = Report
+    fields = ['title', 'category', 'description', 'location']
+    template_name = 'main_app/add_report.html' # Bisa pakai template yang sama dengan Create
+    success_url = reverse_lazy('main_app:home')
+
+# 5. Hapus Laporan (Ganti 'delete_report')
+class ReportDeleteView(DeleteView):
+    model = Report
+    template_name = 'main_app/report_confirm_delete.html'
+    success_url = reverse_lazy('main_app:home')
+
+# 6. Workflow Khusus Perubahan Status
+class ReportUpdateStatusView(View):
+    def post(self, request, pk):
+        report = get_object_or_404(Report, pk=pk)
+        new_status = request.POST.get('status')
+        report.status = new_status
+        report.save()
         return redirect('main_app:home')
-    return render(request, 'main_app/report_confirm_delete.html', {'report': report})

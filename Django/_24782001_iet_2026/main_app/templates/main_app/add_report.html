@@ -1,8 +1,101 @@
-<h2>Form Laporan</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Simpan</button>
-</form>
-<br>
-<a href="{% url 'main_app:home' %}">Batal</a>
+<style>
+    :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --accent-purple: #8b5cf6;
+        --text-main: #f1f5f9;
+        --text-dim: #94a3b8;
+        --input-bg: #0f172a;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .form-card {
+        background: var(--card-bg);
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 500px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    h2 {
+        margin-top: 0;
+        font-size: 24px;
+        background: linear-gradient(to right, #8b5cf6, #2dd4bf);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 30px;
+    }
+
+    /* Styling Default Django Form */
+    form p {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-dim);
+        font-size: 14px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        background: var(--input-bg);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: white;
+        box-sizing: border-box; /* Biar gak luber */
+    }
+
+    input:focus {
+        outline: none;
+        border-color: var(--accent-purple);
+    }
+
+    .btn-save {
+        background: var(--accent-purple);
+        color: white;
+        border: none;
+        padding: 14px;
+        width: 100%;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: 0.3s;
+    }
+
+    .btn-save:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: var(--text-dim);
+        text-decoration: none;
+        font-size: 13px;
+    }
+</style>
+
+<div class="form-card">
+    <h2>{% if object %}Edit Laporan ✏️{% else %}Buat Laporan Baru 📝{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-save">Simpan Perubahan</button>
+    </form>
+    <a href="{% url 'main_app:home' %}" class="back-link">← Kembali ke Dashboard</a>
+</div>

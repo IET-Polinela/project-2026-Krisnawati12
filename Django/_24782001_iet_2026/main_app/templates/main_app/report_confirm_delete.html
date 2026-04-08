@@ -1,7 +1,68 @@
-<h2>Hapus Laporan</h2>
-<p>Yakin ingin menghapus laporan: <b>{{ report.title }}</b>?</p>
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit">Ya, Hapus!</button>
-    <a href="{% url 'main_app:home' %}">Batal</a>
-</form>
+<style>
+    :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --accent-rose: #fb7185;
+        --text-main: #f1f5f9;
+        --text-dim: #94a3b8;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .delete-card {
+        background: var(--card-bg);
+        padding: 40px;
+        border-radius: 24px;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        max-width: 400px;
+        border: 1px solid rgba(251, 113, 133, 0.2);
+    }
+
+    .icon-warning {
+        font-size: 50px;
+        margin-bottom: 20px;
+    }
+
+    h2 { color: var(--accent-rose); margin-bottom: 10px; }
+    p { color: var(--text-dim); margin-bottom: 30px; }
+
+    .btn-delete {
+        background: var(--accent-rose);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-cancel {
+        color: var(--text-dim);
+        text-decoration: none;
+        margin-left: 20px;
+        font-size: 14px;
+    }
+</style>
+
+<div class="delete-card">
+    <div class="icon-warning">⚠️</div>
+    <h2>Hapus Laporan?</h2>
+    <p>Apakah kamu yakin ingin menghapus laporan <b>"{{ object.title }}"</b>? Tindakan ini tidak bisa dibatalkan.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn-delete">Ya, Hapus Sekarang</button>
+        <a href="{% url 'main_app:home' %}" class="btn-cancel">Batal</a>
+    </form>
+</div>
