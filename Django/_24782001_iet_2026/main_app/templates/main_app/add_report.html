@@ -1,22 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Tambah Laporan - SmartVillage{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'main_app:home' %}">Dashboard</a>
+</li>
+<li class="breadcrumb-item active" aria-current="page" style="color: var(--accent-teal);">
+    Tambah Laporan
+</li>
+{% endblock %}
+
+{% block extra_css %}
 <style>
     :root {
         --bg-color: #0f172a;
         --card-bg: #1e293b;
         --accent-purple: #8b5cf6;
+        --accent-teal: #2dd4bf;
+        --accent-rose: #fb7185;
         --text-main: #f1f5f9;
         --text-dim: #94a3b8;
         --input-bg: #0f172a;
     }
 
-    body {
-        font-family: 'Inter', sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-main);
+    /* POIN 12: Container Responsive agar pas di layar kecil */
+    .form-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        margin: 0;
+        min-height: 70vh;
+        padding: 40px 20px;
     }
 
     .form-card {
@@ -29,6 +43,7 @@
         border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    /* POIN 13: Konsistensi UI dengan Header Gradient */
     h2 {
         margin-top: 0;
         font-size: 24px;
@@ -36,66 +51,105 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 30px;
+        font-weight: 800;
     }
 
-    /* Styling Default Django Form */
-    form p {
-        margin-bottom: 20px;
-    }
+    form p { margin-bottom: 20px; }
 
-    label {
+    form label {
         display: block;
         margin-bottom: 8px;
         color: var(--text-dim);
-        font-size: 14px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
     }
 
     input, select, textarea {
         width: 100%;
-        padding: 12px;
+        padding: 12px 15px;
         background: var(--input-bg);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+        border-radius: 12px;
         color: white;
-        box-sizing: border-box; /* Biar gak luber */
+        box-sizing: border-box;
+        transition: 0.3s;
     }
 
-    input:focus {
+    input:focus, select:focus, textarea:focus {
         outline: none;
         border-color: var(--accent-purple);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
     }
 
+    .btn-group-action {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    /* Konsistensi Button Simpan */
     .btn-save {
         background: var(--accent-purple);
         color: white;
         border: none;
         padding: 14px;
-        width: 100%;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2);
+    }
+
+    .btn-save:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 15px 25px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: var(--text-dim);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 12px;
         border-radius: 12px;
         font-weight: 600;
-        cursor: pointer;
-        margin-top: 10px;
+        text-align: center;
+        text-decoration: none;
         transition: 0.3s;
     }
 
-    .btn-save:hover { opacity: 0.9; transform: translateY(-2px); }
-
-    .back-link {
-        display: block;
-        text-align: center;
-        margin-top: 20px;
-        color: var(--text-dim);
-        text-decoration: none;
-        font-size: 13px;
+    .btn-cancel:hover {
+        background: rgba(251, 113, 133, 0.1);
+        color: var(--accent-rose);
+        border-color: var(--accent-rose);
     }
 </style>
+{% endblock %}
 
-<div class="form-card">
-    <h2>{% if object %}Edit Laporan ✏️{% else %}Buat Laporan Baru 📝{% endif %}</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn-save">Simpan Perubahan</button>
-    </form>
-    <a href="{% url 'main_app:home' %}" class="back-link">← Kembali ke Dashboard</a>
+{% block content %}
+<div class="form-container">
+    <div class="form-card shadow-lg">
+        <h2>
+            <i class="bi bi-plus-circle"></i> Laporan Baru
+        </h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="btn-group-action">
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-check2-circle"></i> 
+                    Kirim Laporan Sekarang
+                </button>
+                
+                <a href="{% url 'main_app:home' %}" class="btn-cancel">
+                    <i class="bi bi-x-lg"></i> Batal & Kembali
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
+{% endblock %}

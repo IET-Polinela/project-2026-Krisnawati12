@@ -1,190 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - SmartVillage{% endblock %}
+
+{% block extra_css %}
 <style>
-    :root {
-        --bg-color: #0f172a;
-        --card-bg: #1e293b;
-        --accent-purple: #8b5cf6;
-        --accent-teal: #2dd4bf;
-        --accent-rose: #fb7185;
-        --text-main: #f1f5f9;
-        --text-dim: #94a3b8;
-    }
-
-    body {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-main);
-        margin: 0;
-        padding: 0;
-        line-height: 1.6;
-        scroll-behavior: smooth; /* Bikin scroll jadi halus */
-    }
-
-    .container {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 0 20px 100px 20px;
-    }
-
-    /* SECTION 1: HERO (SELAMAT DATANG) */
-    .hero-section {
-        height: 80vh; /* Hampir satu layar penuh */
+    /* Tinggi section dibuat pas agar enak di-scroll */
+    .scroll-section {
+        min-height: 85vh; 
+        padding: 60px 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;
-        text-align: center;
-        background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.15), transparent),
-                    radial-gradient(circle at bottom left, rgba(45, 212, 191, 0.1), transparent);
     }
 
-    .hero-section h1 {
-        font-size: 56px;
-        font-weight: 800;
-        margin-bottom: 10px;
+    .text-main { color: #f1f5f9; }
+    .text-dim { color: #94a3b8; }
+    .text-teal { color: #2dd4bf; }
+
+    /* Container Tabel & Card - Dark Mode */
+    .table-container, .contact-card, .feature-box {
+        background: #1e293b; 
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .table-container { padding: 20px; overflow-x: auto; }
+    .contact-card { padding: 25px; transition: transform 0.3s ease; }
+    .contact-card:hover { transform: translateY(-5px); border-color: #2dd4bf; }
+
+    /* Custom Table */
+    .custom-table {
+        width: 100%;
+        color: var(--text-main);
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+    .custom-table tr { background: rgba(255, 255, 255, 0.02); }
+    .custom-table td, .custom-table th { padding: 12px 15px; }
+
+    .text-gradient {
         background: linear-gradient(to right, #8b5cf6, #2dd4bf);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
-    .hero-section p {
-        font-size: 18px;
-        color: var(--text-dim);
-        max-width: 600px;
-        margin-bottom: 30px;
-    }
-
-    .scroll-indicator {
-        margin-top: 50px;
-        font-size: 12px;
-        color: var(--accent-teal);
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-        40% {transform: translateY(-10px);}
-        60% {transform: translateY(-5px);}
-    }
-
-    /* SECTION 2: DASHBOARD TABLE */
-    .header-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 60px 0 30px 0;
-        padding-top: 40px;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .btn-add {
-        background: var(--accent-purple);
-        color: white;
-        padding: 12px 24px;
-        text-decoration: none;
-        border-radius: 12px;
-        font-weight: 600;
-        transition: 0.3s;
-    }
-
-    .btn-add:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); }
-
-    .table-container {
-        background: var(--card-bg);
-        border-radius: 20px;
-        padding: 10px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    }
-
-    table { width: 100%; border-collapse: collapse; }
-    th { padding: 20px; text-align: left; color: var(--text-dim); font-size: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-    td { padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.02); }
-
-    .report-title { font-weight: 600; color: var(--text-main); text-decoration: none; }
-    .badge { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; }
-    .status-reported { background: rgba(251, 113, 133, 0.1); color: var(--accent-rose); }
-    .status-verified { background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); }
-    
-    .wf-button {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: white;
-        padding: 8px 15px;
-        border-radius: 8px;
-        cursor: pointer;
+    .illustration-small {
+        max-width: 280px; 
+        filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.15));
     }
 </style>
+{% endblock %}
 
-<div class="hero-section">
-    <h1>Welcome to SmartVillage 🚀</h1>
-    <p>Platform pusat pengelolaan informasi dan pemantauan infrastruktur desa secara digital. Kelola laporan warga dengan lebih efisien dan terorganisir.</p>
-    <a href="#dashboard" class="btn-add">Buka Dashboard Laporan</a>
-    <div class="scroll-indicator">Gulir ke bawah untuk melihat data ↓</div>
-</div>
+{% block content %}
 
-<div class="container" id="dashboard">
-    <div class="header-section">
-        <h2 style="font-size: 24px; margin: 0;">Laporan Aktif ⚡</h2>
-        <a href="{% url 'main_app:add_report' %}" class="btn-add">+ Laporan Baru</a>
+<section id="home-section" class="scroll-section">
+    <div class="text-center">
+        <h1 class="display-5 fw-bold text-main">Welcome to <span class="text-gradient">SmartVillage</span> 🚀</h1>
+        <p class="text-dim fs-5 mb-4">Pusat pengelolaan informasi dan pemantauan infrastruktur desa secara digital.</p>
+        <a href="#reports-section" class="btn btn-outline-info rounded-pill px-4">Buka Dashboard Laporan</a>
+    </div>
+</section>
+
+<section id="reports-section" class="scroll-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-gradient fw-bold mb-0">Laporan Aktif ⚡</h2>
+        <a href="{% url 'main_app:add_report' %}" class="btn btn-primary rounded-pill px-4">
+            <i class="bi bi-plus-lg"></i> Laporan Baru
+        </a>
     </div>
 
-    <div class="table-container">
-        <table>
+    <div class="table-container shadow-lg">
+        <table class="custom-table">
             <thead>
-                <tr>
-                    <th>INFORMASI LAPORAN</th>
-                    <th>STATUS</th>
-                    <th>AKSI CEPAT</th>
-                    <th style="text-align: right;">PENGATURAN</th>
+                <tr class="text-dim small" style="text-transform: uppercase; letter-spacing: 1px;">
+                    <th>Laporan</th>
+                    <th>Lokasi</th>
+                    <th>Status</th>
+                    <th class="text-center">Update</th>
+                    <th class="text-end">Opsi</th>
                 </tr>
             </thead>
             <tbody>
                 {% for report in reports %}
                 <tr>
                     <td>
-                        <a href="{% url 'main_app:report_detail' report.pk %}" class="report-title">{{ report.title }}</a><br>
-                        <small style="color: var(--text-dim);">{{ report.category }}</small>
+                        <div class="fw-bold text-main">{{ report.title }}</div>
+                        <small style="color: #8b5cf6; font-size: 0.75rem;">{{ report.category }}</small>
+                    </td>
+                    <td class="text-dim small">
+                        <i class="bi bi-geo-alt text-info"></i> {{ report.location }}
                     </td>
                     <td>
-                        <span class="badge 
-                            {% if report.status == 'REPORTED' %}status-reported
-                            {% elif report.status == 'VERIFIED' %}status-verified
-                            {% else %}status-process{% endif %}">
+                        <span class="badge" style="padding: 5px 10px; border-radius: 6px; font-size: 10px;
+                            {% if report.status == 'REPORTED' %} background: rgba(251, 113, 133, 0.1); color: #fb7185;
+                            {% elif report.status == 'VERIFIED' %} background: rgba(45, 212, 191, 0.1); color: #2dd4bf;
+                            {% else %} background: rgba(139, 92, 246, 0.1); color: #8b5cf6; {% endif %}">
                             {{ report.get_status_display }}
                         </span>
                     </td>
-                    <td>
-                        {% if report.status == 'REPORTED' %}
+                    <td class="text-center">
+                        {% if report.status != 'RESOLVED' %}
                             <form action="{% url 'main_app:update_status' report.pk %}" method="post">
-                                {% csrf_token %}<input type="hidden" name="status" value="VERIFIED">
-                                <button type="submit" class="wf-button">Verifikasi</button>
-                            </form>
-                        {% elif report.status == 'VERIFIED' %}
-                            <form action="{% url 'main_app:update_status' report.pk %}" method="post">
-                                {% csrf_token %}<input type="hidden" name="status" value="IN_PROGRESS">
-                                <button type="submit" class="wf-button">Kerjakan</button>
-                            </form>
-                        {% elif report.status == 'IN_PROGRESS' %}
-                            <form action="{% url 'main_app:update_status' report.pk %}" method="post">
-                                {% csrf_token %}<input type="hidden" name="status" value="RESOLVED">
-                                <button type="submit" class="wf-button">Selesaikan</button>
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="{% if report.status == 'REPORTED' %}VERIFIED{% elif report.status == 'VERIFIED' %}IN_PROGRESS{% else %}RESOLVED{% endif %}">
+                                <button type="submit" class="btn btn-sm btn-dark border-secondary text-main px-2 py-1" style="font-size: 11px;">
+                                    Update
+                                </button>
                             </form>
                         {% else %}
-                            <span style="color: var(--accent-teal);">✅ Berhasil diatasi</span>
+                            <span class="text-teal small fw-bold" style="font-size: 11px;"><i class="bi bi-check-circle-fill"></i> Selesai</span>
                         {% endif %}
                     </td>
-                    <td style="text-align: right;">
-                        <a href="{% url 'main_app:update_report' report.pk %}" style="text-decoration: none; color: var(--text-dim); font-size: 13px;">Edit</a> | 
-                        <a href="{% url 'main_app:delete_report' report.pk %}" style="text-decoration: none; color: var(--accent-rose); font-size: 13px;">Hapus</a>
+                    <td class="text-end">
+                        <a href="{% url 'main_app:update_report' report.pk %}" class="text-dim me-2"><i class="bi bi-pencil small"></i></a>
+                        <a href="{% url 'main_app:delete_report' report.pk %}" class="text-danger" onclick="return confirm('Hapus?')"><i class="bi bi-trash small"></i></a>
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
-                    <td colspan="4" style="text-align: center; padding: 50px; color: var(--text-dim);">Belum ada laporan masuk hari ini.</td>
-                </tr>
+                <tr><td colspan="5" class="text-center py-4 text-dim">Belum ada data.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-</div>
+</section>
+
+<section id="about-section" class="scroll-section">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h6 class="text-teal fw-bold text-uppercase small mb-2" style="letter-spacing: 2px;">Tentang Kami</h6>
+            <h2 class="fw-bold text-main mb-4">Solusi Digital untuk <span class="text-gradient">Desa</span></h2>
+            <p class="text-dim mb-4" style="line-height: 1.7;">
+                SmartVillage Lite mendigitalisasi sistem pelaporan desa agar setiap kendala infrastruktur bisa dilaporkan warga secara real-time dan dipantau secara transparan.
+            </p>
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="p-3 feature-box">
+                        <i class="bi bi-lightning-charge-fill text-warning fs-4 mb-2 d-block"></i>
+                        <span class="text-main fw-bold small">Respon Cepat</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-3 feature-box">
+                        <i class="bi bi-eye-fill text-info fs-4 mb-2 d-block"></i>
+                        <span class="text-main fw-bold small">Transparan</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 text-center mt-5 mt-md-0">
+            <div class="position-relative d-inline-block">
+                <div class="position-absolute top-50 start-50 translate-middle rounded-circle" 
+                     style="width: 250px; height: 250px; background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%); z-index: -1;"></div>
+                <img src="https://illustrations.popsy.co/white/work-from-home.svg" class="illustration-small img-fluid" alt="About">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contact-section" class="scroll-section">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-main">Hubungi <span class="text-gradient">Kami</span></h2>
+        <p class="text-dim small">Butuh bantuan teknis atau ingin memberikan saran?</p>
+    </div>
+    <div class="row g-3 justify-content-center">
+        <div class="col-md-4">
+            <div class="contact-card text-center">
+                <i class="bi bi-whatsapp text-success mb-2" style="font-size: 2rem;"></i>
+                <h6 class="text-main mb-1">WhatsApp</h6>
+                <a href="https://wa.me/081356697465" target="_blank" class="text-dim text-decoration-none small">0813-5669-7465</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="contact-card text-center">
+                <i class="bi bi-envelope text-warning mb-2" style="font-size: 2rem;"></i>
+                <h6 class="text-main mb-1">Email</h6>
+                <a href="mailto:smartvillage@gmail.com" class="text-dim text-decoration-none small">smartvillage@gmail.com</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

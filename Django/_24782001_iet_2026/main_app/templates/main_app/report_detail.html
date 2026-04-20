@@ -1,34 +1,143 @@
-<style>
-    body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-    .detail-card { background: #1e293b; padding: 40px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 100%; max-width: 600px; border: 1px solid rgba(255,255,255,0.05); }
-    h2 { background: linear-gradient(to right, #8b5cf6, #2dd4bf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
-    .info { margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
-    label { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
-    p { margin: 5px 0 0 0; font-size: 16px; }
-    .back-btn { display: inline-block; margin-top: 30px; color: #2dd4bf; text-decoration: none; font-weight: 600; }
-</style>
+{% extends 'base.html' %}
 
-<div class="detail-card">
-    <h2>Detail Laporan 🔍</h2>
-    <div class="info">
-        <label>Judul</label>
-        <p>{{ object.title }}</p>
+{% block title %}Detail Laporan - {{ object.title }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'main_app:home' %}">Dashboard</a></li>
+<li class="breadcrumb-item active" aria-current="page">Detail Laporan</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Konsistensi Layout (Poin 13) */
+    .detail-container {
+        max-width: 850px;
+        margin: 0 auto;
+        padding-bottom: 50px;
+    }
+
+    .detail-card {
+        background: #1e293b; /* Warna card dark mode kamu */
+        padding: 40px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+        background: linear-gradient(to right, #8b5cf6, #2dd4bf);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        margin-bottom: 30px;
+    }
+
+    .info-label {
+        color: #94a3b8;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .info-content {
+        color: #f1f5f9;
+        font-size: 17px;
+        margin-bottom: 25px;
+    }
+
+    /* POIN 12: Grid Responsive */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 25px;
+    }
+
+    @media (max-width: 768px) {
+        .info-grid { grid-template-columns: 1fr; }
+        .detail-card { padding: 25px; }
+    }
+
+    /* Badge Status (Poin 13) */
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .status-reported { background: rgba(251, 113, 133, 0.1); color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.2); }
+    .status-verified { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); }
+    .status-process { background: rgba(45, 212, 191, 0.1); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.2); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="detail-card">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <h2 class="m-0">Detail Laporan 🔍</h2>
+            <div class="status-badge 
+                {% if object.status == 'REPORTED' %}status-reported
+                {% elif object.status == 'VERIFIED' %}status-verified
+                {% else %}status-process{% endif %}">
+                <i class="bi bi-info-circle-fill"></i> {{ object.get_status_display }}
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div>
+                <span class="info-label">Judul Laporan</span>
+                <p class="info-content fw-bold">{{ object.title }}</p>
+            </div>
+            <div>
+                <span class="info-label">Kategori</span>
+                <p class="info-content"><i class="bi bi-tag me-2" style="color: #8b5cf6;"></i>{{ object.category }}</p>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div>
+                <span class="info-label">Lokasi</span>
+                <p class="info-content"><i class="bi bi-geo-alt me-2" style="color: #2dd4bf;"></i>{{ object.location }}</p>
+            </div>
+            <div>
+                <span class="info-label">ID Laporan</span>
+                <p class="info-content text-dim">#{{ object.pk }}</p>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <span class="info-label">Deskripsi Lengkap</span>
+            <div class="p-3" style="background: rgba(0,0,0,0.2); border-radius: 12px; line-height: 1.7; color: #cbd5e1;">
+                {{ object.description|linebreaks }}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-5">
+            <a href="{% url 'main_app:home' %}" class="text-decoration-none" style="color: #94a3b8; font-weight: 600;">
+                <i class="bi bi-arrow-left me-2"></i> Kembali
+            </a>
+            
+            <div class="d-flex gap-2">
+                <a href="{% url 'main_app:delete_report' object.pk %}" 
+                   onclick="return confirm('Yakin ingin menghapus laporan ini?')" 
+                   class="btn btn-outline-danger" style="border-radius: 10px; padding: 10px 15px;">
+                    <i class="bi bi-trash"></i>
+                </a>
+
+                <a href="{% url 'main_app:update_report' object.pk %}" class="btn" 
+                   style="background: #8b5cf6; color: white; border-radius: 10px; padding: 10px 25px; font-weight: 700;">
+                    <i class="bi bi-pencil-square me-2"></i> Edit Laporan
+                </a>
+            </div>
+        </div>
     </div>
-    <div class="info">
-        <label>Kategori</label>
-        <p>{{ object.category }}</p>
-    </div>
-    <div class="info">
-        <label>Lokasi</label>
-        <p>{{ object.location }}</p>
-    </div>
-    <div class="info">
-        <label>Deskripsi</label>
-        <p>{{ object.description }}</p>
-    </div>
-    <div class="info">
-        <label>Status Saat Ini</label>
-        <p><b>{{ object.get_status_display }}</b></p>
-    </div>
-    <a href="{% url 'main_app:home' %}" class="back-btn">← Kembali ke Dashboard</a>
 </div>
+{% endblock %}

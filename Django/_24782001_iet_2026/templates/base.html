@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}SmartVillage{% endblock %}</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --accent-purple: #8b5cf6;
+            --accent-teal: #2dd4bf;
+        }
+
+        /* EFEK FULL PAGE SCROLLING */
+        html {
+            scroll-behavior: smooth;
+            /* Scroll padding supaya pas pindah section gak kepotong navbar */
+            scroll-padding-top: 70px; 
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* NAVBAR BLUR EFFECT */
+        .navbar {
+            background: rgba(15, 23, 42, 0.8) !important;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 15px 0;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: 0.3s;
+            margin: 0 5px;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-teal) !important;
+            transform: translateY(-2px);
+        }
+
+        /* BREADCRUMB CUSTOM */
+        .breadcrumb-wrapper {
+            background: rgba(30, 41, 59, 0.4);
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .breadcrumb-item a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--accent-teal);
+        }
+
+        /* ALERT CUSTOM */
+        .alert {
+            border-radius: 15px;
+            border: none;
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 768px) {
+            .container-fluid { padding-left: 15px !important; padding-right: 15px !important; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid px-lg-5">
+            <a class="navbar-brand fw-bold fs-4" href="{% url 'main_app:home' %}" style="background: linear-gradient(to right, #8b5cf6, #2dd4bf); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                SmartVillage
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'main_app:home' %}#home-section">Home</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'main_app:home' %}#reports-section">Reports</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'main_app:home' %}#about-section">About</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'main_app:home' %}#contact-section">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="breadcrumb-wrapper">
+        <div class="container-fluid px-lg-5">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'main_app:home' %}"><i class="bi bi-house-door"></i> Home</a></li>
+                    {% block breadcrumb %}{% endblock %}
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container-fluid px-lg-5 mt-3">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-lg" role="alert" style="background: rgba(30, 41, 59, 0.8); color: white; border-left: 4px solid var(--accent-teal);">
+                <i class="bi bi-info-circle-fill me-2 text-teal"></i> {{ message }}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // FEEDBACK LOADING SAAT SUBMIT
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function() {
+                const btn = this.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Mengirim...`;
+                    btn.disabled = true;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
