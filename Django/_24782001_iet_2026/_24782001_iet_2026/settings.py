@@ -29,7 +29,13 @@ INSTALLED_APPS = [
     'main_app',
     'about',
     'contacts',
+    
+    # Tambahan Lab 6 - NPM 24782001
+    'usermanagement_24782001',
 ]
+
+# Konfigurasi User Custom Lab 6
+AUTH_USER_MODEL = 'usermanagement_24782001.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -46,7 +52,6 @@ ROOT_URLCONF = '_24782001_iet_2026.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # Ini akan otomatis mencari folder 'templates' yang sejajar dengan manage.py
         'DIRS': [BASE_DIR / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
@@ -63,8 +68,6 @@ TEMPLATES = [
 WSGI_APPLICATION = '_24782001_iet_2026.wsgi.application'
 
 # Database Configuration (PostgreSQL)
-# 1. Pastikan database 'smartcity_db' sudah dibuat di pgAdmin
-# 2. Ganti 'PASSWORD' sesuai password yang kamu buat pas install PostgreSQL
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -92,5 +95,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
+
+# Pengaturan Redirect Login/Logout Lab 6
+LOGIN_REDIRECT_URL = 'main_app:home'
+LOGOUT_REDIRECT_URL = 'main_app:home'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Styling biar input form-nya nggak kaku dan support Dark Mode */
+    input {
+        width: 100%;
+        padding: 12px;
+        margin-top: 5px;
+        border-radius: 10px;
+        border: 1px solid #444;
+        background-color: #2b3035 !important;
+        color: white !important;
+    }
+    input:focus {
+        border-color: #0d6efd;
+        outline: none;
+        box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+    }
+    .card-login {
+        background-color: #1a1d20;
+        border: 1px solid #333;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card card-login shadow-lg border-0 rounded-4 text-white">
+                <div class="card-body p-4">
+                    <h3 class="text-center mb-4">Login Smart Village</h3>
+                    <hr class="mb-4" style="border-top: 1px solid #444;">
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label text-light">Username</label>
+                            {{ form.username }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light">Password</label>
+                            {{ form.password }}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill mt-3 py-2 fw-bold">
+                            Login Now
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <small class="text-secondary">Belum punya akun? 
+                            <a href="{% url 'usermanagement_24782001:register' %}" class="text-primary text-decoration-none">Daftar di sini</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

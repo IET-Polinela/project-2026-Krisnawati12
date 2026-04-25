@@ -1,183 +1,211 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - SmartVillage{% endblock %}
+{% block title %}Dashboard - SmartVillage Lite{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Tinggi section dibuat pas agar enak di-scroll */
-    .scroll-section {
-        min-height: 85vh; 
-        padding: 60px 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .text-main { color: #f1f5f9; }
-    .text-dim { color: #94a3b8; }
-    .text-teal { color: #2dd4bf; }
-
-    /* Container Tabel & Card - Dark Mode */
-    .table-container, .contact-card, .feature-box {
-        background: #1e293b; 
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .table-container { padding: 20px; overflow-x: auto; }
-    .contact-card { padding: 25px; transition: transform 0.3s ease; }
-    .contact-card:hover { transform: translateY(-5px); border-color: #2dd4bf; }
-
-    /* Custom Table */
-    .custom-table {
-        width: 100%;
-        color: var(--text-main);
-        border-collapse: separate;
-        border-spacing: 0 8px;
-    }
-    .custom-table tr { background: rgba(255, 255, 255, 0.02); }
-    .custom-table td, .custom-table th { padding: 12px 15px; }
-
+    /* Layout & Scrolling */
+    .scroll-section { min-height: 90vh; padding: 100px 0; display: flex; align-items: center; }
     .text-gradient {
         background: linear-gradient(to right, #8b5cf6, #2dd4bf);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        font-weight: 800;
     }
 
-    .illustration-small {
-        max-width: 280px; 
-        filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.15));
+    /* Container Tabel */
+    .table-container {
+        background: #1e293b;
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
     }
+    .custom-table { width: 100%; color: white; }
+    .custom-table th { color: #94a3b8; border-bottom: 1px solid #334155; padding: 15px; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+    .custom-table td { padding: 20px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); vertical-align: middle; }
+    
+    /* Warna Status Badge */
+    .status-badge { padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 10px; text-transform: uppercase; }
+    .status-reported { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .status-verified { background: rgba(139, 92, 246, 0.1); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2); }
+    .status-resolved { background: rgba(45, 212, 191, 0.1); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.2); }
+
+    /* Tombol Aksi */
+    .btn-action { transition: 0.3s; font-weight: 600; font-size: 0.85rem; }
+    .btn-action:hover { transform: scale(1.05); }
+
+    /* Contact Card */
+    .contact-card {
+        background: #1e293b;
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        transition: 0.3s;
+        height: 100%;
+    }
+    .contact-card:hover { transform: translateY(-10px); border-color: #2dd4bf; }
+    .icon-box { font-size: 3.5rem; margin-bottom: 20px; }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="container">
+    
+    <section id="home-section" class="scroll-section">
+        <div class="row align-items-center w-100">
+            <div class="col-md-7">
+                <h1 class="display-3 fw-bold mb-3">SmartVillage <span class="text-gradient">Lite</span> 🚀</h1>
+                <p class="lead text-secondary mb-4">Sistem informasi digital untuk pelaporan infrastruktur desa yang transparan, akuntabel, dan responsif.</p>
+                <a href="#reports-section" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-lg">Mulai Pantau Laporan</a>
+            </div>
+            <div class="col-md-5 text-center d-none d-md-block">
+                <img src="https://illustrations.popsy.co/white/abstract-art-4.svg" class="img-fluid" style="max-height: 400px;">
+            </div>
+        </div>
+    </section>
 
-<section id="home-section" class="scroll-section">
-    <div class="text-center">
-        <h1 class="display-5 fw-bold text-main">Welcome to <span class="text-gradient">SmartVillage</span> 🚀</h1>
-        <p class="text-dim fs-5 mb-4">Pusat pengelolaan informasi dan pemantauan infrastruktur desa secara digital.</p>
-        <a href="#reports-section" class="btn btn-outline-info rounded-pill px-4">Buka Dashboard Laporan</a>
-    </div>
-</section>
+    <section id="reports-section" class="scroll-section">
+        <div class="w-100">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h2 class="fw-bold fs-1">Laporan <span class="text-primary">Aktif</span> ⚡</h2>
+                {% if user.is_authenticated and user.is_admin %}
+                <a href="{% url 'main_app:add_report' %}" class="btn btn-info rounded-pill px-4 fw-bold text-white shadow">+ Laporan Baru</a>
+                {% endif %}
+            </div>
+            
+            <div class="table-container shadow-lg">
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Informasi Laporan</th>
+                                <th>Lokasi</th>
+                                <th>Status</th>
+                                {% if user.is_admin %}
+                                <th>Aksi Cepat</th>
+                                <th class="text-end">Pengaturan</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold fs-5 text-white">{{ report.title }}</div>
+                                    <span class="text-primary small">{{ report.category }}</span>
+                                </td>
+                                <td class="text-secondary small">
+                                    <i class="bi bi-geo-alt-fill text-teal me-1"></i> {{ report.location }}
+                                </td>
+                                <td>
+                                    <span class="status-badge 
+                                        {% if report.status == 'REPORTED' %}status-reported
+                                        {% elif report.status == 'VERIFIED' %}status-verified
+                                        {% else %}status-resolved{% endif %}">
+                                        {{ report.get_status_display }}
+                                    </span>
+                                </td>
 
-<section id="reports-section" class="scroll-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-gradient fw-bold mb-0">Laporan Aktif ⚡</h2>
-        <a href="{% url 'main_app:add_report' %}" class="btn btn-primary rounded-pill px-4">
-            <i class="bi bi-plus-lg"></i> Laporan Baru
-        </a>
-    </div>
+                                {% if user.is_admin %}
+                                <td>
+                                    <form action="{% url 'main_app:update_status' report.pk %}" method="post">
+                                        {% csrf_token %}
+                                        {% if report.status == 'REPORTED' %}
+                                            <button type="submit" class="btn btn-sm btn-outline-info btn-action rounded-pill px-3" 
+                                                    onclick="return confirm('Verifikasi laporan ini?')">
+                                                <i class="bi bi-shield-check me-1"></i> Verifikasi
+                                            </button>
+                                        {% elif report.status == 'VERIFIED' %}
+                                            <button type="submit" class="btn btn-sm btn-outline-warning btn-action rounded-pill px-3" 
+                                                    onclick="return confirm('Mulai kerjakan laporan ini?')">
+                                                <i class="bi bi-tools me-1"></i> Kerjakan
+                                            </button>
+                                        {% elif report.status == 'RESOLVED' %}
+                                            <button type="button" class="btn btn-sm btn-success rounded-pill px-3 disabled">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Selesai
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-3">
+                                        <a href="{% url 'main_app:update_report' report.pk %}" class="text-warning text-decoration-none" 
+                                           onclick="return confirm('Edit data laporan ini?')">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <a href="{% url 'main_app:delete_report' report.pk %}" class="text-danger text-decoration-none" 
+                                           onclick="return confirm('Yakin ingin menghapus laporan ini selamanya?')">
+                                            <i class="bi bi-trash"></i> Hapus
+                                        </a>
+                                    </div>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center py-5 text-secondary fs-5">Belum ada laporan infrastruktur.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="table-container shadow-lg">
-        <table class="custom-table">
-            <thead>
-                <tr class="text-dim small" style="text-transform: uppercase; letter-spacing: 1px;">
-                    <th>Laporan</th>
-                    <th>Lokasi</th>
-                    <th>Status</th>
-                    <th class="text-center">Update</th>
-                    <th class="text-end">Opsi</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for report in reports %}
-                <tr>
-                    <td>
-                        <div class="fw-bold text-main">{{ report.title }}</div>
-                        <small style="color: #8b5cf6; font-size: 0.75rem;">{{ report.category }}</small>
-                    </td>
-                    <td class="text-dim small">
-                        <i class="bi bi-geo-alt text-info"></i> {{ report.location }}
-                    </td>
-                    <td>
-                        <span class="badge" style="padding: 5px 10px; border-radius: 6px; font-size: 10px;
-                            {% if report.status == 'REPORTED' %} background: rgba(251, 113, 133, 0.1); color: #fb7185;
-                            {% elif report.status == 'VERIFIED' %} background: rgba(45, 212, 191, 0.1); color: #2dd4bf;
-                            {% else %} background: rgba(139, 92, 246, 0.1); color: #8b5cf6; {% endif %}">
-                            {{ report.get_status_display }}
-                        </span>
-                    </td>
-                    <td class="text-center">
-                        {% if report.status != 'RESOLVED' %}
-                            <form action="{% url 'main_app:update_status' report.pk %}" method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="status" value="{% if report.status == 'REPORTED' %}VERIFIED{% elif report.status == 'VERIFIED' %}IN_PROGRESS{% else %}RESOLVED{% endif %}">
-                                <button type="submit" class="btn btn-sm btn-dark border-secondary text-main px-2 py-1" style="font-size: 11px;">
-                                    Update
-                                </button>
-                            </form>
-                        {% else %}
-                            <span class="text-teal small fw-bold" style="font-size: 11px;"><i class="bi bi-check-circle-fill"></i> Selesai</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-end">
-                        <a href="{% url 'main_app:update_report' report.pk %}" class="text-dim me-2"><i class="bi bi-pencil small"></i></a>
-                        <a href="{% url 'main_app:delete_report' report.pk %}" class="text-danger" onclick="return confirm('Hapus?')"><i class="bi bi-trash small"></i></a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5" class="text-center py-4 text-dim">Belum ada data.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</section>
-
-<section id="about-section" class="scroll-section">
-    <div class="row align-items-center">
-        <div class="col-md-6">
-            <h6 class="text-teal fw-bold text-uppercase small mb-2" style="letter-spacing: 2px;">Tentang Kami</h6>
-            <h2 class="fw-bold text-main mb-4">Solusi Digital untuk <span class="text-gradient">Desa</span></h2>
-            <p class="text-dim mb-4" style="line-height: 1.7;">
-                SmartVillage Lite mendigitalisasi sistem pelaporan desa agar setiap kendala infrastruktur bisa dilaporkan warga secara real-time dan dipantau secara transparan.
-            </p>
-            <div class="row g-3">
-                <div class="col-6">
-                    <div class="p-3 feature-box">
-                        <i class="bi bi-lightning-charge-fill text-warning fs-4 mb-2 d-block"></i>
-                        <span class="text-main fw-bold small">Respon Cepat</span>
+    <section id="about-section" class="scroll-section">
+        <div class="row align-items-center w-100">
+            <div class="col-md-6 text-center">
+                <img src="https://illustrations.popsy.co/white/work-from-home.svg" class="img-fluid" style="max-height: 350px;">
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-primary fw-bold text-uppercase">Tentang Proyek</h6>
+                <h2 class="display-5 fw-bold mb-4">Digitalkan Desa Kita</h2>
+                <p class="text-secondary fs-5 mb-4" style="line-height: 1.8;">
+                    SmartVillage Lite adalah prototipe sistem pelaporan yang memungkinkan warga berpartisipasi aktif dalam memelihara fasilitas umum. Transparansi data adalah prioritas kami.
+                </p>
+                <div class="d-flex gap-3">
+                    <div class="p-3 bg-dark border border-secondary rounded-4 text-center w-50">
+                        <h4 class="text-primary fw-bold mb-1">24/7</h4>
+                        <small class="text-secondary">Monitoring</small>
+                    </div>
+                    <div class="p-3 bg-dark border border-secondary rounded-4 text-center w-50">
+                        <h4 class="text-info fw-bold mb-1">Cepat</h4>
+                        <small class="text-secondary">Respon Laporan</small>
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="p-3 feature-box">
-                        <i class="bi bi-eye-fill text-info fs-4 mb-2 d-block"></i>
-                        <span class="text-main fw-bold small">Transparan</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact-section" class="scroll-section">
+        <div class="w-100 text-center">
+            <h2 class="display-5 fw-bold mb-5">Hubungi <span class="text-primary">Admin Desa</span></h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="contact-card shadow">
+                        <div class="icon-box text-success"><i class="bi bi-whatsapp"></i></div>
+                        <h3 class="fw-bold">WhatsApp</h3>
+                        <p class="text-secondary mb-4">Layanan pengaduan cepat via pesan instan langsung ke admin.</p>
+                        <a href="https://wa.me/6281372648776" target="_blank" class="btn btn-success rounded-pill px-5 fw-bold">Chat 0813-7264-8776</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="contact-card shadow">
+                        <div class="icon-box text-info"><i class="bi bi-envelope-at"></i></div>
+                        <h3 class="fw-bold">Email Official</h3>
+                        <p class="text-secondary mb-4">Kirimkan proposal resmi atau kritik saran secara formal.</p>
+                        <a href="mailto:smartvillage@gmail.com" class="btn btn-info text-white rounded-pill px-5 fw-bold shadow">smartvillage@gmail.com</a>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 text-center mt-5 mt-md-0">
-            <div class="position-relative d-inline-block">
-                <div class="position-absolute top-50 start-50 translate-middle rounded-circle" 
-                     style="width: 250px; height: 250px; background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%); z-index: -1;"></div>
-                <img src="https://illustrations.popsy.co/white/work-from-home.svg" class="illustration-small img-fluid" alt="About">
-            </div>
-        </div>
-    </div>
-</section>
+    </section>
 
-<section id="contact-section" class="scroll-section">
-    <div class="text-center mb-4">
-        <h2 class="fw-bold text-main">Hubungi <span class="text-gradient">Kami</span></h2>
-        <p class="text-dim small">Butuh bantuan teknis atau ingin memberikan saran?</p>
-    </div>
-    <div class="row g-3 justify-content-center">
-        <div class="col-md-4">
-            <div class="contact-card text-center">
-                <i class="bi bi-whatsapp text-success mb-2" style="font-size: 2rem;"></i>
-                <h6 class="text-main mb-1">WhatsApp</h6>
-                <a href="https://wa.me/081356697465" target="_blank" class="text-dim text-decoration-none small">0813-5669-7465</a>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="contact-card text-center">
-                <i class="bi bi-envelope text-warning mb-2" style="font-size: 2rem;"></i>
-                <h6 class="text-main mb-1">Email</h6>
-                <a href="mailto:smartvillage@gmail.com" class="text-dim text-decoration-none small">smartvillage@gmail.com</a>
-            </div>
-        </div>
-    </div>
-</section>
+</div>
 
+<footer class="py-5 text-center border-top border-secondary mt-5">
+    <p class="text-secondary mb-1">&copy; 2026 SmartVillage Lite - Sistem Informasi Desa Digital</p>
+    <p class="text-secondary small">Dibuat oleh <strong>Parjo Jeffandra</strong> - Teknologi Rekayasa Internet (Smt 4)</p>
+</footer>
 {% endblock %}
