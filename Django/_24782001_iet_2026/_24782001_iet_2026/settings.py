@@ -1,6 +1,5 @@
 """
 Django settings for _24782001_iet_2026 project.
-Sesuai Instruksi Lab 7 - Dashboard & Statistik
 """
 
 from pathlib import Path
@@ -20,17 +19,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     
-    # Aplikasi Utama
+    # Lab 9 & 10 Tambahan REST Framework
+    'rest_framework',
+    'rest_framework_simplejwt', 
+    
+    # Aplikasi Utama & Tugas Kelompokmu
     'main_app',
     'about',
     'contacts',
-    
-    # Lab 6 - NPM 24782001
     'usermanagement_24782001',
-
-    # Lab 7 - Dashboard (WAJIB ADA sesuai Instruksi 1)
     'dashboard_24782001', 
 ]
 
@@ -95,3 +93,16 @@ LOGIN_REDIRECT_URL = 'main_app:home'
 LOGOUT_REDIRECT_URL = 'main_app:home'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- REST FRAMEWORK CONFIGURATION FOR JWT ---
+# Konfigurasi otentikasi stateless menggunakan SimpleJWT sesuai modul
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication'
+    )
+}
