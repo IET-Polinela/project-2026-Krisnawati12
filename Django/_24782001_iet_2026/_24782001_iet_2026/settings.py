@@ -20,6 +20,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # Lab 11 Tambahan Baru: Library Pengatur CORS (Mengizinkan komunikasi lintas port)
+    'corsheaders',
+    
     # Lab 9 & 10 Tambahan REST Framework
     'rest_framework',
     'rest_framework_simplejwt', 
@@ -36,6 +39,9 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'usermanagement_24782001.User'
 
 MIDDLEWARE = [
+    # Lab 11 Tambahan Baru: WAJIB diletakkan di urutan paling atas sebelum CommonMiddleware!
+    'corsheaders.middleware.CorsMiddleware',  
+    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -106,3 +112,14 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication'
     )
 }
+
+# ----------------------------------------------------------------------
+# Lab 11 Tambahan Baru: Konfigurasi Izin Port Frontend Local Web Server
+# ----------------------------------------------------------------------
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+]
+
+# Mengizinkan pengiriman token/credentials di dalam header HTTP Request
+CORS_ALLOW_CREDENTIALS = True
