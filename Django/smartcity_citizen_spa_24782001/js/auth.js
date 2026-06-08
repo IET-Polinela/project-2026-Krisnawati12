@@ -3,30 +3,45 @@ function setupLoginForm() {
     if (!loginForm) return;
 
     loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Mencegah password bocor ke URL / reload halaman
+        e.preventDefault(); // Mencegah reload halaman
 
         const usernameInput = document.getElementById('loginUsername').value;
         const passwordInput = document.getElementById('loginPassword').value;
 
-        // Kirim payload ke endpoint Django sesuai instruksi
-        const response = await requestAPI('/api/token/', 'POST', {
-            username: usernameInput,
-            password: passwordInput
-        });
+        try {
+            // Kirim payload ke endpoint JWT Django
+            const response = await requestAPI('/api/token/', 'POST', {
+                username: usernameInput,
+                password: passwordInput
+            });
 
-        if (response.ok && response.data.access) {
-            // Simpan access dan refresh token ke localStorage
-            localStorage.setItem('access_token', response.data.access);
-            localStorage.setItem('refresh_token', response.data.refresh);
-            localStorage.setItem('username', usernameInput);
+            console.log('Login Response:', response);
 
-            alert(`Sukses! Selamat datang, ${usernameInput}!`);
-            
-            // Ubah rute secara instan ke dashboard
-            window.location.hash = '#dashboard';
-        } else {
-            const errorMsg = response.data.detail || 'Username atau password salah.';
-            alert(`Gagal: ${errorMsg}`);
+            // PERBAIKAN: gunakan status, bukan response.ok
+            if (response.status === 200 && response.data?.access) {
+
+                // Simpan token
+                localStorage.setItem('access_token', response.data.access);
+                localStorage.setItem('refresh_token', response.data.refresh);
+                localStorage.setItem('username', usernameInput);
+
+                alert(`Sukses! Selamat datang, ${usernameInput}!`);
+
+                // Pindah ke dashboard
+                window.location.hash = '#dashboard';
+
+            } else {
+
+                const errorMsg =
+                    response?.data?.detail ||
+                    'Username atau password salah.';
+
+                alert(`Gagal: ${errorMsg}`);
+            }
+
+        } catch (error) {
+            console.error('Login Error:', error);
+            alert('Terjadi kesalahan saat menghubungi server.');
         }
     });
 }

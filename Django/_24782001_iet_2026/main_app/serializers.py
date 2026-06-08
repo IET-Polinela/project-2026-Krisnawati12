@@ -2,27 +2,52 @@ from rest_framework import serializers
 from .models import Report
 
 class ReportSerializer(serializers.ModelSerializer):
-    # Baris bawaan Lab 9 kamu tetap dipertahankan
+    # Baris bawaan Lab 9 tetap dipertahankan
     reporter = serializers.SerializerMethodField()
+    
+    # -----------------------------------------------------------------
+    # TAMBAHAN BARU LAB 12: Daftarkan Field is_owner
+    # -----------------------------------------------------------------
+    is_owner = serializers.SerializerMethodField()
 
     class Meta:
         model = Report
+        # Pastikan 'is_owner' dimasukkan ke dalam list fields
         fields = [
-            'id', 'title', 'category', 'description', 
-            'location', 'status', 'reporter', 
-            'created_at', 'updated_at'
+            'id', 'title', 'description', 'category', 'status', 'location',
+            'created_at', 'updated_at', 'reporter', 'is_owner',
         ]
         # Mengunci field waktu agar otomatis diatur oleh sistem database
         read_only_fields = ['created_at', 'updated_at']
 
+    # -----------------------------------------------------------------
+    # MODIFIKASI LAB 12: Pengaman Nama Pelapor Berbasis Tab Menu
+    # -----------------------------------------------------------------
     def get_reporter(self, obj):
-        """
-        Fungsi bawaan Lab 9 kamu untuk menampilkan nama pelapor.
-        Jika di database field reporter kosong, tampil sebagai Warga Anonim.
-        """
+        request = self.context.get('request')
+        if request:
+            # Membaca parameter ?tab= yang sedang diakses di URL oleh SPA
+            tab = request.query_params.get('tab', None)
+            
+            # Jika tab yang dibuka adalah 'feed' (Feed Kota Publik)
+            if tab == 'feed':
+                # Cek jika laporan tersebut BUKAN miliknya, langsung sensor namanya
+                if obj.reporter != request.user:
+                    return "Warga Anonim"
+
+        # Kondisi default atau saat di tab "Laporan Saya", tampilkan nama aslinya
         if obj.reporter:
             return obj.reporter.username
         return "Warga Anonim"
+
+    # -----------------------------------------------------------------
+    # TAMBAHAN BARU LAB 12: Fungsi Pengecekan Kepemilikan Laporan
+    # -----------------------------------------------------------------
+    def get_is_owner(self, obj):
+        request = self.context.get('request', None)
+        if not request or not hasattr(request, 'user'):
+            return False
+        return request.user == getattr(obj, 'reporter', None)
 
     def get_fields(self):
         fields = super().get_fields()
@@ -36,7 +61,10 @@ class ReportSerializer(serializers.ModelSerializer):
         if hasattr(request.user, 'is_admin') and not request.user.is_admin:
             if 'status' in fields:
                 fields['status'] = serializers.ChoiceField(
-                    choices=[('DRAFT', 'Draft')], 
+                    choices=[
+                        ('DRAFT', 'Draft'),
+                        ('REPORTED', 'Reported')
+                    ],
                     default='DRAFT'
                 )
         
@@ -51,12 +79,21 @@ class ReportSerializer(serializers.ModelSerializer):
         return fields
 
     def validate_status(self, value):
-        """
-        Pengaman tingkat tinggi (Backend): Menolak jika Citizen mencoba menembak status 
-        selain 'DRAFT' menggunakan tools luar seperti Postman.
-        """
+
         request = self.context.get('request')
-        if request and request.user and hasattr(request.user, 'is_admin'):
-            if not request.user.is_admin and value != 'DRAFT':
-                raise serializers.ValidationError("Citizen hanya diperbolehkan mengirim laporan dengan status 'DRAFT'!")
+
+        if (
+            request and
+            request.user and
+            hasattr(request.user, 'is_admin') and
+            not request.user.is_admin
+        ):
+
+            allowed_status = ['DRAFT', 'REPORTED']
+
+            if value not in allowed_status:
+                raise serializers.ValidationError(
+                    "Citizen hanya boleh menggunakan status DRAFT atau REPORTED."
+                )
+
         return value

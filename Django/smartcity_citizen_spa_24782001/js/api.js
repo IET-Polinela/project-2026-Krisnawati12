@@ -1,25 +1,29 @@
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'http://127.0.0.1:8000/api';
 
-async function requestAPI(endpoint, method = 'GET', bodyData = null) {
-    const accessToken = localStorage.getItem('access_token');
-    const headers = { 'Content-Type': 'application/json' };
+function getAccessToken(){ return localStorage.getItem('access_token'); }
 
-    if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
-    }
+async function requestAPI(path, method='GET', body=null){
+    // normalize path and keep querystring
+    const raw = String(path || '').trim();
+    const [p, qs] = raw.split('?');
+    const resource = p.startsWith('/api/') ? p.replace(/^\/+/, '') : p.replace(/^\/+/, '');
+    const url = `${BASE_URL}/${resource}${urlEndsWithSlash(resource) ? '' : '/'}${qs ? '?'+qs : ''}`;
 
-    const options = { method: method, headers: headers };
+    const headers = { 'Accept': 'application/json' };
+    if (body) headers['Content-Type'] = 'application/json';
+    const token = getAccessToken();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    if (bodyData && (method === 'POST' || method === 'PUT')) {
-        options.body = JSON.stringify(bodyData);
-    }
+    const resp = await fetch(url, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null,
+        credentials: 'omit'
+    }).catch(e => ({ fetchError: e }));
 
-    try {
-        const response = await fetch(`${BASE_URL}${endpoint}`, options);
-        const data = await response.json();
-        return { status: response.status, ok: response.ok, data: data };
-    } catch (error) {
-        console.error('Koneksi API Gagal:', error);
-        return { status: 500, ok: false, data: { detail: 'Koneksi ke server gagal.' } };
-    }
+    if (!resp || resp.fetchError) return { status: 0, error: resp.fetchError };
+    const data = await resp.json().catch(()=>null);
+    return { status: resp.status, data };
 }
+
+function urlEndsWithSlash(s){ return s.endsWith('/'); }

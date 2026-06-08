@@ -120,6 +120,5 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5500",
     "http://localhost:5500",
 ]
-
-# Mengizinkan pengiriman token/credentials di dalam header HTTP Request
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:5500"]

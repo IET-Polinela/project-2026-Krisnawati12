@@ -1,49 +1,46 @@
-from rest_framework import viewsets, permissions
-from rest_framework.exceptions import PermissionDenied
+from rest_framework import viewsets, pagination, permissions
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.db.models import Q
 from .models import Report
 from .serializers import ReportSerializer
-from .permissions import IsOwnerAndDraftOrReadOnly
+
+
+class ReportPagination(pagination.PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 
 class ReportViewSet(viewsets.ModelViewSet):
+    # JWT Authentication
+    authentication_classes = [JWTAuthentication]
+
+    # User login boleh POST, guest hanya baca
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     serializer_class = ReportSerializer
+    pagination_class = ReportPagination
+    queryset = Report.objects.all().order_by('-updated_at')
 
     def get_queryset(self):
         user = self.request.user
+        qs = Report.objects.all().order_by('-updated_at')
+        tab = self.request.query_params.get('tab', None)
 
-        # BYPASS: Jika admin yang login, buka SEMUA data laporan (termasuk DRAFT) biar ga error 404 lagi
-        if hasattr(user, 'is_admin') and user.is_admin:
-            return Report.objects.all()
-        
-        from django.db.models import Q
-        return Report.objects.filter(
-            Q(reporter=user) | ~Q(status='DRAFT')
-        )
+        # PERBAIKAN: hindari error AnonymousUser
+        if not user or user.is_anonymous:
+            return Report.objects.none()
 
-    def get_permissions(self):
-        if self.action == 'destroy':
-            class IsCitizenOnlyForDelete(permissions.BasePermission):
-                def has_permission(self, request, view):
-                    if hasattr(request.user, 'is_admin') and request.user.is_admin:
-                        return False
-                    return True
-            return [permissions.IsAuthenticated(), IsCitizenOnlyForDelete(), IsOwnerAndDraftOrReadOnly()]
+        if tab == 'my_reports':
+            return qs.filter(reporter=user)
 
-        if self.action in ['update', 'partial_update']:
-            class AllowAdminOrOwner(permissions.BasePermission):
-                def has_object_permission(self, request, view, obj):
-                    # BYPASS: Semua request edit/update dilolosin dulu biar bisa ganti status lewat Postman
-                    return True
-            return [permissions.IsAuthenticated(), AllowAdminOrOwner()]
-        
-        if self.action == 'create':
-            class IsCitizenOnly(permissions.BasePermission):
-                def has_permission(self, request, view):
-                    if hasattr(request.user, 'is_admin') and request.user.is_admin:
-                        return False
-                    return True
-            return [permissions.IsAuthenticated(), IsCitizenOnly()]
+        if tab == 'feed':
+            return qs.exclude(reporter=user).filter(~Q(status='DRAFT'))
 
-        return [permissions.IsAuthenticated()]
+        return qs.filter(~Q(status='DRAFT') | Q(reporter=user))
 
     def perform_create(self, serializer):
         serializer.save(reporter=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save()
