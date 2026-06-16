@@ -1,4 +1,5 @@
-const BASE_URL = 'http://127.0.0.1:8000/api';
+// Ganti base API supaya terhubung ke server kampus
+const API_BASE = 'http://103.151.63.71:8005';
 
 function getAccessToken(){ return localStorage.getItem('access_token'); }
 
@@ -7,7 +8,7 @@ async function requestAPI(path, method='GET', body=null){
     const raw = String(path || '').trim();
     const [p, qs] = raw.split('?');
     const resource = p.startsWith('/api/') ? p.replace(/^\/+/, '') : p.replace(/^\/+/, '');
-    const url = `${BASE_URL}/${resource}${urlEndsWithSlash(resource) ? '' : '/'}${qs ? '?'+qs : ''}`;
+    const url = `${API_BASE}/${resource}${urlEndsWithSlash(resource) ? '' : '/'}${qs ? '?'+qs : ''}`;
 
     const headers = { 'Accept': 'application/json' };
     if (body) headers['Content-Type'] = 'application/json';
