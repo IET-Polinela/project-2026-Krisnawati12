@@ -1,4 +1,4 @@
-// Ganti base API supaya terhubung ke server kampus
+// Ganti base API supaya frontend memanggil server kampus
 const API_BASE = 'http://103.151.63.71:8005';
 
 function getAccessToken(){ return localStorage.getItem('access_token'); }
