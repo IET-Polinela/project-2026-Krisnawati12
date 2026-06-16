@@ -17,6 +17,7 @@ async function loadDashboardData(tab = currentTab, page = currentPage) {
     const loadingEl = document.getElementById('loadingBar');
     if (loadingEl) loadingEl.style.display = 'block';
 
+    // Menggunakan requestAPI dari api.js
     const response = await requestAPI(`/api/report/?tab=${encodeURIComponent(currentTab)}&page=${encodeURIComponent(currentPage)}`, 'GET');
 
     try {
@@ -204,7 +205,6 @@ async function handleReportSubmit(targetStatus = 'REPORTED') {
         category: document.getElementById('reportCategory').value,
         description: document.getElementById('reportDescription').value.trim(),
         location: document.getElementById('reportLocation').value.trim(),
-        // Kita tetap kirim status yang diinginkan user
         status: targetStatus 
     };
 
@@ -229,11 +229,9 @@ async function handleReportSubmit(targetStatus = 'REPORTED') {
             const returnedStatus = returnedData?.status?.toUpperCase();
 
             // 2. DETEKSI MASALAH STATUS DRAFT
-            // Jika user minta DRAFT tapi server baliknya REPORTED
             if (targetStatus === 'DRAFT' && returnedStatus === 'REPORTED') {
                 console.warn('⚠️ Server memaksa status jadi REPORTED. Melakukan fix otomatis...');
                 
-                // Ambil ID laporan yang baru saja dibuat
                 const newReportId = returnedData.id || editingReportId;
                 
                 if (newReportId) {
@@ -287,25 +285,6 @@ function renderPagination() {
 }
 
 // =====================================================================
-// 7. API HELPER
-// =====================================================================
-function getAccessToken(){ return localStorage.getItem('access_token'); }
-async function requestAPI(path, method='GET', body=null){
-  const raw = String(path||'').trim();
-  const [p, qs] = raw.split('?');
-  const resource = p.startsWith('/api/') ? p.replace(/^\/+/, '') : `api/${p.replace(/^\/+/, '')}`;
-  const finalPath = resource.endsWith('/') ? resource : resource + '/';
-  const url = `${finalPath}${qs ? '?' + qs : ''}`;
-  const headers = {'Accept':'application/json'};
-  if (body) headers['Content-Type']='application/json';
-  const token = getAccessToken();
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  return fetch(url, { method, headers, body: body?JSON.stringify(body):null, credentials:'omit' })
-    .then(r => r.json().catch(()=>null).then(data => ({ status: r.status, data })))
-    .catch(err => ({ status:0, error: err }));
-}
-
-// =====================================================================
 // 8. INITIALIZATION
 // =====================================================================
 window.addEventListener('DOMContentLoaded', () => {
@@ -323,6 +302,6 @@ window.addEventListener('DOMContentLoaded', () => {
     // Cegah default action submit bawaan browser form
     const form = document.getElementById('reportForm');
     if (form) {
-        form.addEventListener('submit', (e) => e.preventDefault());
+        form.addEventListener('submit', (e) => e.preventDefault();
     }
 });
