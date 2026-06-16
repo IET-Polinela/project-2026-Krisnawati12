@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["master"]  # <-- SUDAH DIGANTI JADI MASTER
+    branches: ["master"]
   workflow_dispatch:
 
 permissions:
@@ -30,8 +30,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # PATH INI SUDAH BENAR SESUAI STRUKTUR FOLDER KAMU
-          path: './smartcity_citizen_spa_24782001' 
+          # PERHATIAN: Path sekarang mencakup folder 'Django' di depannya
+          path: './Django/smartcity_citizen_spa_24782001' 
           
       - name: Deploy to GitHub Pages
         id: deployment
