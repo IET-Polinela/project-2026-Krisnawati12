@@ -289,14 +289,13 @@ function renderPagination() {
 // =====================================================================
 // 7. API HELPER
 // =====================================================================
-const API_BASE = 'http://127.0.0.1:8000';
 function getAccessToken(){ return localStorage.getItem('access_token'); }
 async function requestAPI(path, method='GET', body=null){
   const raw = String(path||'').trim();
   const [p, qs] = raw.split('?');
   const resource = p.startsWith('/api/') ? p.replace(/^\/+/, '') : `api/${p.replace(/^\/+/, '')}`;
   const finalPath = resource.endsWith('/') ? resource : resource + '/';
-  const url = `${API_BASE}/${finalPath}${qs ? '?' + qs : ''}`;
+  const url = `${finalPath}${qs ? '?' + qs : ''}`;
   const headers = {'Accept':'application/json'};
   if (body) headers['Content-Type']='application/json';
   const token = getAccessToken();
