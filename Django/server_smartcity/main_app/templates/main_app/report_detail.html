@@ -125,6 +125,7 @@
                 <i class="bi bi-arrow-left me-2"></i> Kembali
             </a>
             
+            {% if object.reporter == user and not user.is_admin %}
             <div class="d-flex gap-2">
                 <a href="{% url 'main_app:delete_report' object.pk %}" 
                    onclick="return confirm('Yakin ingin menghapus laporan ini?')" 
@@ -137,6 +138,7 @@
                     <i class="bi bi-pencil-square me-2"></i> Edit Laporan
                 </a>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

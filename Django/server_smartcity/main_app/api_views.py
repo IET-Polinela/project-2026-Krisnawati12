@@ -5,6 +5,31 @@ from .models import Report
 from .serializers import ReportSerializer
 
 
+class ReportAccessPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return request.user and request.user.is_authenticated
+
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        if view.action == 'create':
+            return not getattr(request.user, 'is_admin', False)
+
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        if getattr(request.user, 'is_admin', False):
+            if obj.status == 'DRAFT' or view.action == 'destroy':
+                return False
+            return set(request.data.keys()) <= {'status'}
+
+        return obj.reporter == request.user
+
+
 class ReportPagination(pagination.PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -12,11 +37,8 @@ class ReportPagination(pagination.PageNumberPagination):
 
 
 class ReportViewSet(viewsets.ModelViewSet):
-    # JWT Authentication
     authentication_classes = [JWTAuthentication]
-
-    # User login boleh POST, guest hanya baca
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, ReportAccessPermission]
 
     serializer_class = ReportSerializer
     pagination_class = ReportPagination
@@ -27,9 +49,11 @@ class ReportViewSet(viewsets.ModelViewSet):
         qs = Report.objects.all().order_by('-updated_at')
         tab = self.request.query_params.get('tab', None)
 
-        # PERBAIKAN: hindari error AnonymousUser
         if not user or user.is_anonymous:
             return Report.objects.none()
+
+        if getattr(user, 'is_admin', False):
+            return qs.exclude(status='DRAFT')
 
         if tab == 'my_reports':
             return qs.filter(reporter=user)
@@ -40,7 +64,7 @@ class ReportViewSet(viewsets.ModelViewSet):
         return qs.filter(~Q(status='DRAFT') | Q(reporter=user))
 
     def perform_create(self, serializer):
-        serializer.save(reporter=self.request.user)
+        serializer.save(reporter=self.request.user, status='REPORTED')
 
     def perform_update(self, serializer):
         serializer.save()

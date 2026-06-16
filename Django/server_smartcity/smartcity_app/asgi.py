@@ -8,9 +8,8 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
 """
 
 import os
-
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', '_24782001_iet_2026.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smartcity_app.settings')
 
 application = get_asgi_application()

@@ -7,13 +7,248 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f4f6f9; } 
-        .spa-container { min-height: calc(100vh - 80px); }
+        /* Premium Dark Mode Theme - Solusi Fix Kontras & Anti-White Card */
+        :root{
+            --bg-main: #0f172a; /* slate-900 */
+            --card-bg: #111827; /* very dark slate */
+            --input-bg: #0f172a; 
+            --glass-border: rgba(255,255,255,0.06); 
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent-purple: #8b5cf6;
+            --accent-teal: #2dd4bf;
+            --accent-focus: #2dd4bf; 
+            --shadow-soft: 0 20px 50px rgba(2,6,23,0.6);
+        }
+
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            min-height:100vh;
+            color:var(--text-main);
+            background: linear-gradient(180deg, #071028 0%, var(--bg-main) 40%, #0b1220 100%);
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            -webkit-font-smoothing:antialiased;
+        }
+
+        /* Topbar */
+        .navbar{
+            width:min(1180px, calc(100% - 2rem));
+            margin:1rem auto;
+            border-radius:14px;
+            background: linear-gradient(180deg, rgba(17,24,39,0.8), rgba(15,23,42,0.7)) !important;
+            border:1px solid var(--glass-border);
+            box-shadow:var(--shadow-soft);
+            backdrop-filter: blur(10px);
+        }
+        .navbar-brand{font-weight:800; background:linear-gradient(135deg,var(--accent-purple),var(--accent-teal)); -webkit-background-clip:text; background-clip:text; color:transparent}
+
+        /* Layout SPA Container */
+        .spa-container{ width:min(1180px, calc(100% - 2rem)); margin:1.25rem auto 3rem; min-height:calc(100vh - 140px); }
+
+        /* Auth shell Fullscreen Mode (Anti-Numpuk memanjang ke bawah) */
+        .auth-shell{ position:fixed; inset:0; z-index:9999; display:grid; place-items:center; padding:1.25rem; background: linear-gradient(135deg, #071028 0%, #0f172a 100%); }
+        .auth-card{ width:min(100%,440px); border-radius:18px; padding:2.5rem; background:var(--card-bg) !important; border:1px solid var(--glass-border); box-shadow:var(--shadow-soft); }
+        .auth-card h4{ color:var(--text-main); font-weight:800; } 
+        .auth-card .form-label{ color:var(--text-muted); font-weight:600; font-size:0.875rem; }
+        .auth-card a{ color:var(--accent-teal); font-weight:600; text-decoration:none; }
+        .auth-card a:hover{ color:var(--accent-purple); }
+
+        /* Fix Total Paksa Element Dashboard Agar Selalu Gelap & Teks Terbaca */
+        .floating-panel, .report-card, .modal-content, .card, .card-body, .bg-white { 
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: var(--text-main) !important;
+            box-shadow: var(--shadow-soft) !important;
+            border-radius: 14px;
+        }
+
+        /* Fix Tombol Navigasi / List Group Item Agar Tidak Memutih Saat Aktif */
+        .list-group-item, .list-group-item:focus, .list-group-item:active, .list-group-item.active {
+            background-color: rgba(30, 41, 59, 0.4) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--glass-border) !important;
+        }
+        .list-group-item:hover {
+            background-color: rgba(139, 92, 246, 0.1) !important;
+            color: var(--accent-teal) !important;
+        }
+
+        /* Input Form & Textarea - Menjamin Latar Tetap Gelap & Tulisan Putih Saat Diketik */
+        input, textarea, select, .form-control, .form-select {
+            background-color: var(--input-bg) !important;
+            color: var(--text-main) !important;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        input::placeholder, textarea::placeholder { color: #4b5563 !important; }
+        
+        /* State Focus / Waktu Mengetik (Anti-Memutih) */
+        input:focus, textarea:focus, select:focus, .form-control:focus, .form-select:focus {
+            background-color: var(--input-bg) !important;
+            color: var(--text-main) !important;
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(45,212,191,0.15) !important;
+            border-color: var(--accent-focus) !important;
+        }
+
+        /* Overide Autofill Browser Google Chrome */
+        input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+            box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+            -webkit-text-fill-color: var(--text-main) !important;
+        }
+
+        /* Tombol Premium Gradient */
+        .btn-premium{ 
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal)) !important; 
+            color: #0f172a !important; font-weight:700 !important; border: 0 !important; border-radius: 10px; 
+            padding: 10px 20px;
+        }
+        .btn-premium:hover{ filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-outline-secondary { color: var(--text-main) !important; border-color: rgba(255,255,255,0.15) !important; border-radius: 10px; }
+        .btn-outline-secondary:hover { background: rgba(255,255,255,0.05) !important; }
+
+        /* Global Typography Fix (Memaksa teks di render JS tetap putih cerah) */
+        #app-content, #app-content h1, #app-content h2, #app-content h3, #app-content h4, #app-content h5, #app-content h6, #app-content p, #app-content div, #app-content span {
+            color: var(--text-main) !important;
+        }
+        .text-muted, .text-secondary, .small { color: var(--text-muted) !important; }
+        
+        /* PANEL STATISTIK: FIX WARNA ANGKA & LABEL */
+        .floating-panel .stat-row {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .floating-panel .stat-row small {
+            color: var(--text-muted) !important;
+            font-weight: 700 !important;
+            font-size: 0.85rem;
+        }
+        
+        /* Badges Glow & Warna Teks Angka Dipaksa Kontras Sesuai Varian */
+        .stat-badge { 
+            min-width:52px; padding:0.3rem 0.7rem; border-radius:8px; font-weight:800; text-align:center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+        }
+        .stat-badge.stat-draft{ background: linear-gradient(135deg,#fde68a,#fbbf24) !important; color:#422006 !important; }
+        .stat-badge.stat-reported{ background: linear-gradient(135deg,#f9a8d4,#f472b6) !important; color:#3a052e !important; }
+        .stat-badge.stat-verified{ background: linear-gradient(135deg,#c084fc,#8b5cf6) !important; color:#ffffff !important; }
+        .stat-badge.stat-progress{ background: linear-gradient(135deg,#fdba74,#fb923c) !important; color:#422006 !important; }
+        .stat-badge.stat-resolved{ background: linear-gradient(135deg,#99f6e4,#2dd4bf) !important; color:#022826 !important; }
+
+        /* TAMBAHAN: Fix Statistik Agar Lebih Kontras */
+        .floating-panel, .stat-panel, .stats-container, .dashboard-stats {
+            background: rgba(17, 24, 39, 0.8) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 14px;
+            padding: 1.5rem;
+        }
+
+        /* Fix semua elemen statistik */
+        .stat-item, .stat-card, .stat-box, .stat-widget {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(45, 212, 191, 0.1)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Angka statistik harus besar dan kontras */
+        .stat-item h3, .stat-card h3, .stat-box h3, .stat-value, .stat-number {
+            font-size: 2rem !important;
+            font-weight: 800 !important;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal)) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            margin: 0.5rem 0 !important;
+        }
+
+        /* Label statistik */
+        .stat-item small, .stat-card small, .stat-box small, .stat-label {
+            color: var(--text-muted) !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            font-size: 0.75rem !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        /* Fallback untuk elemen statistik apapun */
+        [id*="stat"], [id*="count"], [class*="stat"], [class*="count"] {
+            color: var(--text-main) !important;
+        }
+
+        /* Pastikan angka di dalam stat-badge tetap terbaca */
+        .stat-badge {
+            font-size: 1.5rem !important;
+            font-weight: 800 !important;
+            min-width: 60px !important;
+            padding: 0.5rem 1rem !important;
+        }
+
+        .hidden { display: none !important; }
+        /* FIX INPUT FIELD - Anti Putih Saat Diketik */
+        input:focus, textarea:focus, select:focus, 
+        .form-control:focus, .form-select:focus {
+            background-color: var(--input-bg) !important;
+            color: var(--text-main) !important;
+            border-color: var(--accent-teal) !important;
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2) !important;
+        }
+
+        /* Fix Autofill Chrome yang bikin background putih */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        textarea:-webkit-autofill,
+        textarea:-webkit-autofill:hover,
+        textarea:-webkit-autofill:focus,
+        select:-webkit-autofill,
+        select:-webkit-autofill:hover,
+        select:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+            box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+            -webkit-text-fill-color: var(--text-main) !important;
+            caret-color: var(--text-main) !important;
+            transition: background-color 5000s ease-in-out 0s !important;
+        }
+
+        /* Fix placeholder agar tetap terlihat */
+        input::placeholder, textarea::placeholder, select::placeholder {
+            color: #6b7280 !important;
+            opacity: 1 !important;
+        }
+
+        /* Fix untuk modal input */
+        .modal-content input, 
+        .modal-content textarea, 
+        .modal-content select,
+        .modal-content .form-control,
+        .modal-content .form-select {
+            background-color: var(--input-bg) !important;
+            color: var(--text-main) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .modal-content input:focus, 
+        .modal-content textarea:focus, 
+        .modal-content select:focus {
+            background-color: var(--input-bg) !important;
+            color: var(--text-main) !important;
+            border-color: var(--accent-teal) !important;
+        }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold" href="#">
                 <i class="bi bi-buildings-fill me-2"></i>Smart City Portal
@@ -24,53 +259,111 @@
 
     <main class="container-fluid px-4 mt-4 spa-container" id="app-content"></main>
 
-    <!-- Modal: Buat / Edit Laporan -->
+    <section id="authArea" class="auth-shell hidden" aria-hidden="true">
+        <div class="auth-area">
+            <div id="loginBox" class="auth-card">
+                <div class="text-center mb-4">
+                    <i class="bi bi-buildings-fill fs-1" style="color: var(--accent-teal)"></i>
+                    <h4 class="fw-bold mt-2">Masuk Portal Warga</h4>
+                    <p class="text-muted small mb-0">Kelola laporan fasilitas kota dalam satu sistem digital.</p>
+                </div>
+
+                <form id="loginFormInline" novalidate>
+                    <div class="mb-3">
+                        <label for="loginUsernameInline" class="form-label">Username</label>
+                        <input type="text" id="loginUsernameInline" class="form-control" placeholder="Masukkan username" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="loginPasswordInline" class="form-label">Password</label>
+                        <input type="password" id="loginPasswordInline" class="form-control" placeholder="Masukkan password" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-premium w-100 fw-bold mb-3">Masuk Aplikasi</button>
+
+                    <div class="text-center">
+                        <span class="text-muted small">Belum punya akun resmi?</span>
+                        <a href="javascript:void(0)" class="ms-1" id="linkToRegister">Daftar di sini</a>
+                    </div>
+                </form>
+            </div>
+
+            <div id="registerBoxInline" class="auth-card hidden">
+                <div class="text-center mb-4">
+                    <i class="bi bi-person-plus-fill fs-1" style="color: var(--accent-purple)"></i>
+                    <h4 class="fw-bold mt-2">Daftar Akun Warga</h4>
+                    <p class="text-muted small mb-0">Lengkapi data untuk mendapatkan hak akses pelaporan.</p>
+                </div>
+
+                <form id="registerFormInline" novalidate>
+                    <div class="mb-3">
+                        <label for="registerFullNameInline" class="form-label">Nama Lengkap</label>
+                        <input type="text" id="registerFullNameInline" class="form-control" placeholder="Masukkan nama lengkap sesuai KTP" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="registerUsernameInline" class="form-label">Username Baru</label>
+                        <input type="text" id="registerUsernameInline" class="form-control" placeholder="Buat nama pengguna unik" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="registerPasswordInline" class="form-label">Password</label>
+                        <input type="password" id="registerPasswordInline" class="form-control" placeholder="Buat sandi minimal 6 karakter" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-premium w-100 fw-bold mb-3" style="background: linear-gradient(135deg, var(--accent-teal), var(--accent-purple)) !important;">Registrasi Akun</button>
+
+                    <div class="text-center">
+                        <span class="text-muted small">Sudah terdaftar sebelumnya?</span>
+                        <a href="javascript:void(0)" class="ms-1" id="linkToLogin">Login di sini</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer" style="z-index: 10000;"></div>
+
     <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-primary text-white">
+            <div class="modal-content">
+                <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="reportModalLabel">
-                        <i class="bi bi-pencil-square me-2"></i>Buat Laporan Baru
+                        <i class="bi bi-pencil-square me-2" style="color: var(--accent-teal)"></i>Buat Laporan Baru
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form id="reportForm" onsubmit="return false;">
-                        <!-- Field: Title -->
+                    <form id="reportForm">
                         <div class="mb-3">
-                            <label for="reportTitle" class="form-label">Judul</label>
-                            <input type="text" id="reportTitle" class="form-control" placeholder="Masukkan judul laporan" required />
+                            <label for="reportTitle" class="form-label">Judul Keluhan</label>
+                            <input type="text" id="reportTitle" class="form-control" placeholder="Contoh: Lubang jalan di perempatan" required />
                         </div>
 
-                        <!-- Field: Category -->
                         <div class="mb-3">
                             <label for="reportCategory" class="form-label">Kategori</label>
-                            <select id="reportCategory" class="form-select">
-                                <option value="">Pilih kategori</option>
-                                <option value="infrastruktur">Infrastruktur</option>
-                                <option value="kebersihan">Kebersihan</option>
-                                <option value="keamanan">Keamanan</option>
-                                <!-- Tambah opsi sesuai kebutuhan -->
+                            <select id="reportCategory" class="form-select" required>
+                                <option value="">Pilih kategori fasilitas</option>
+                                <option value="infrastruktur">Infrastruktur Jalan & Jembatan</option>
+                                <option value="kebersihan">Kebersihan & Sampah Kota</option>
+                                <option value="keamanan">Keamanan & Ketertiban Umum</option>
                             </select>
                         </div>
 
-                        <!-- Field: Description -->
                         <div class="mb-3">
-                            <label for="reportDescription" class="form-label">Deskripsi</label>
-                            <textarea id="reportDescription" class="form-control" rows="4" placeholder="Jelaskan masalah atau kejadian" required></textarea>
+                            <label for="reportDescription" class="form-label">Deskripsi Kronologi Masalah</label>
+                            <textarea id="reportDescription" class="form-control" rows="4" placeholder="Ceritakan detail kondisi kerusakan di lapangan" required></textarea>
                         </div>
 
-                        <!-- Field: Location -->
                         <div class="mb-3">
-                            <label for="reportLocation" class="form-label">Lokasi</label>
-                            <input type="text" id="reportLocation" class="form-control" placeholder="Contoh: Jalan Merdeka No.1" required />
+                            <label for="reportLocation" class="form-label">Detail Lokasi / Patokan</label>
+                            <input type="text" id="reportLocation" class="form-control" placeholder="Contoh: Jl. Sukarno Hatta RT 02 (Depan Toko X)" required />
                         </div>
 
-                        <!-- Hidden: editing id (di-manage oleh JS variable editingReportId) -->
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-outline-secondary fw-bold px-4" id="btnDraft">Simpan Draft</button>
-                            <button id="btnSubmit" type="button" class="btn btn-primary fw-bold px-4">
-                                Ajukan <i class="bi bi-send-fill ms-1"></i>
+                        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary fw-bold px-4" id="btnDraft">Simpan Ke Draft</button>
+                            <button id="btnSubmit" type="button" class="btn btn-premium fw-bold px-4">
+                                Kirim Laporan <i class="bi bi-send-fill ms-1"></i>
                             </button>
                         </div>
                     </form>
@@ -85,50 +378,15 @@
     <script src="js/router.js"></script>
     <script src="js/app.js"></script>
 
-    <!-- Script: buka modal & wire tombol -->
     <script>
-        (function () {
-            // Jika tombol "Tambah Laporan Baru" punya id lain, ganti 'btnAddReport' sesuai elemen Anda
-            const btnAdd = document.getElementById('btnAddReport');
-            const modalEl = document.getElementById('reportModal');
-
-            function resetForm() {
-                editingReportId = null; // global var dari app.js
-                const f = document.getElementById('reportForm');
-                if (!f) return;
-                f.reset();
-                // kosongkan juga input manual jika diperlukan
-                document.getElementById('reportTitle').value = '';
-                document.getElementById('reportCategory').value = '';
-                document.getElementById('reportDescription').value = '';
-                document.getElementById('reportLocation').value = '';
-            }
-
-            if (btnAdd && modalEl) {
-                btnAdd.addEventListener('click', function () {
-                    resetForm();
-                    new bootstrap.Modal(modalEl).show();
-                });
-            }
-
-            // Tombol Simpan Draft
-            const btnDraft = document.getElementById('btnDraft');
-            if (btnDraft) {
-                btnDraft.addEventListener('click', function () {
-                    // Gunakan status 'DRAFT' — sesuaikan jika backend pakai nama lain
-                    handleReportSubmit('DRAFT');
-                });
-            }
-
-            // Tombol Ajukan
-            const btnSubmit = document.getElementById('btnSubmit');
-            if (btnSubmit) {
-                btnSubmit.addEventListener('click', function () {
-                    // Gunakan status 'SUBMITTED' atau sesuai skema backend Anda
-                    handleReportSubmit('SUBMITTED');
-                });
-            }
-        })();
+        document.getElementById('linkToRegister').onclick = function() {
+            document.getElementById('loginBox').classList.add('hidden');
+            document.getElementById('registerBoxInline').classList.remove('hidden');
+        };
+        document.getElementById('linkToLogin').onclick = function() {
+            document.getElementById('registerBoxInline').classList.add('hidden');
+            document.getElementById('loginBox').classList.remove('hidden');
+        };
     </script>
 </body>
 </html>

@@ -45,3 +45,39 @@ function setupLoginForm() {
         }
     });
 }
+
+function setupRegisterForm() {
+    const registerForm = document.getElementById('registerForm');
+    if (!registerForm) return;
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('registerUsername').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value;
+
+        if (!username || !password) {
+            alert('Username dan password wajib diisi.');
+            return;
+        }
+
+        try {
+            const payload = { username, password };
+            if (email) payload.email = email;
+
+            const response = await requestAPI('/api/register/', 'POST', payload);
+
+            if (response.status === 201 || response.status === 200) {
+                alert('Registrasi berhasil. Silakan login.');
+                window.location.hash = '#login';
+            } else {
+                const errorMsg = response?.data?.detail || JSON.stringify(response?.data || 'Registrasi gagal.');
+                alert(`Gagal: ${errorMsg}`);
+            }
+        } catch (error) {
+            console.error('Register Error:', error);
+            alert('Terjadi kesalahan saat menghubungi server.');
+        }
+    });
+}

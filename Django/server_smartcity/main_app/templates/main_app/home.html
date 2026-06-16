@@ -4,7 +4,6 @@
 
 {% block extra_css %}
 <style>
-    /* Layout & Scrolling */
     .scroll-section { min-height: 90vh; padding: 100px 0; display: flex; align-items: center; }
     .text-gradient {
         background: linear-gradient(to right, #8b5cf6, #2dd4bf);
@@ -13,7 +12,6 @@
         font-weight: 800;
     }
 
-    /* Container Tabel */
     .table-container {
         background: #1e293b;
         border: 1px solid rgba(255,255,255,0.05);
@@ -21,24 +19,23 @@
         padding: 30px;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
     }
+
     .custom-table { width: 100%; color: white; border-collapse: separate; border-spacing: 0 10px; }
     .custom-table th { color: #94a3b8; border-bottom: 1px solid #334155; padding: 15px; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
     .custom-table td { padding: 15px; vertical-align: middle; background: rgba(255,255,255,0.02); }
     .custom-table tr td:first-child { border-radius: 10px 0 0 10px; }
     .custom-table tr td:last-child { border-radius: 0 10px 10px 0; }
-    
-    /* Warna Status Badge */
+
     .status-badge { padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 10px; text-transform: uppercase; }
+    .status-draft { background: rgba(148, 163, 184, 0.1); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.2); }
     .status-reported { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
     .status-verified { background: rgba(139, 92, 246, 0.1); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2); }
     .status-inprogress { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
     .status-resolved { background: rgba(45, 212, 191, 0.1); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.2); }
 
-    /* Tombol Aksi */
     .btn-action { transition: 0.3s; font-weight: 600; font-size: 0.85rem; }
     .btn-action:hover { transform: scale(1.05); }
 
-    /* Contact Card */
     .contact-card {
         background: #1e293b;
         border: 1px solid rgba(255,255,255,0.05);
@@ -48,6 +45,7 @@
         transition: 0.3s;
         height: 100%;
     }
+
     .contact-card:hover { transform: translateY(-10px); border-color: #2dd4bf; }
     .icon-box { font-size: 3.5rem; margin-bottom: 20px; }
 </style>
@@ -55,11 +53,11 @@
 
 {% block content %}
 <div class="container">
-    
+
     <section id="home-section" class="scroll-section">
         <div class="row align-items-center w-100">
             <div class="col-md-7">
-                <h1 class="display-3 fw-bold mb-3">SmartVillage <span class="text-gradient">Lite</span> 🚀</h1>
+                <h1 class="display-3 fw-bold mb-3">SmartVillage <span class="text-gradient">Lite</span></h1>
                 <p class="lead text-secondary mb-4">Sistem informasi digital untuk pelaporan infrastruktur desa yang transparan, akuntabel, dan responsif.</p>
                 <a href="#reports-section" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-lg">Mulai Pantau Laporan</a>
             </div>
@@ -72,12 +70,15 @@
     <section id="reports-section" class="scroll-section">
         <div class="w-100">
             <div class="d-flex justify-content-between align-items-center mb-5">
-                <h2 class="fw-bold fs-1">Laporan <span class="text-primary">Aktif</span> ⚡</h2>
-                {% if user.is_authenticated and user.is_admin %}
-                <a href="{% url 'main_app:add_report' %}" class="btn btn-info rounded-pill px-4 fw-bold text-white shadow">+ Laporan Baru</a>
+                <h2 class="fw-bold fs-1">Laporan <span class="text-primary">Aktif</span></h2>
+
+                {% if user.is_authenticated and not user.is_admin %}
+                <a href="{% url 'main_app:add_report' %}" class="btn btn-info rounded-pill px-4 fw-bold text-white shadow">
+                    + Laporan Baru
+                </a>
                 {% endif %}
             </div>
-            
+
             <div class="table-container shadow-lg">
                 <div class="table-responsive">
                     <table class="custom-table">
@@ -87,26 +88,27 @@
                                 <th>Informasi Laporan</th>
                                 <th>Lokasi</th>
                                 <th>Status</th>
-                                {% if user.is_admin %}
-                                <th>Aksi Cepat</th>
-                                <th class="text-end">Pengaturan</th>
-                                {% endif %}
+                                <th class="text-end">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for report in reports %}
                             <tr>
                                 <td class="text-secondary fw-bold">{{ forloop.counter }}</td>
+
                                 <td>
                                     <div class="fw-bold fs-5 text-white">{{ report.title }}</div>
                                     <span class="text-primary small">{{ report.category }}</span>
                                 </td>
+
                                 <td class="text-secondary small">
                                     <i class="bi bi-geo-alt-fill text-teal me-1"></i> {{ report.location }}
                                 </td>
+
                                 <td>
-                                    <span class="status-badge 
-                                        {% if report.status == 'REPORTED' %}status-reported
+                                    <span class="status-badge
+                                        {% if report.status == 'DRAFT' %}status-draft
+                                        {% elif report.status == 'REPORTED' %}status-reported
                                         {% elif report.status == 'VERIFIED' %}status-verified
                                         {% elif report.status == 'IN_PROGRESS' %}status-inprogress
                                         {% else %}status-resolved{% endif %}">
@@ -114,43 +116,55 @@
                                     </span>
                                 </td>
 
-                                {% if user.is_admin %}
-                                <td>
-                                    <form action="{% url 'main_app:update_status' report.pk %}" method="post">
-                                        {% csrf_token %}
-                                        {% if report.status == 'REPORTED' %}
+                                <td class="text-end">
+                                    {% if user.is_admin %}
+                                        <form action="{% url 'main_app:update_status' report.pk %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+
+                                            {% if report.status == 'REPORTED' %}
                                             <button type="submit" class="btn btn-sm btn-outline-info btn-action rounded-pill px-3" onclick="return confirm('Verifikasi laporan ini?')">
-                                                <i class="bi bi-shield-check me-1"></i> Verifikasi
+                                                <i class="bi bi-shield-check me-1"></i> Ubah Status
                                             </button>
-                                        {% elif report.status == 'VERIFIED' %}
+                                            {% elif report.status == 'VERIFIED' %}
                                             <button type="submit" class="btn btn-sm btn-outline-warning btn-action rounded-pill px-3" onclick="return confirm('Mulai kerjakan laporan ini?')">
-                                                <i class="bi bi-tools me-1"></i> Kerjakan
+                                                <i class="bi bi-tools me-1"></i> Ubah Status
                                             </button>
-                                        {% elif report.status == 'IN_PROGRESS' %}
-                                            <button type="submit" class="btn btn-sm btn-outline-success btn-action rounded-pill px-3" onclick="return confirm('Apakah pekerjaan laporan ini sudah selesai?')">
-                                                <i class="bi bi-check-all me-1"></i> Selesaikan
+                                            {% elif report.status == 'IN_PROGRESS' %}
+                                            <button type="submit" class="btn btn-sm btn-outline-success btn-action rounded-pill px-3" onclick="return confirm('Selesaikan laporan ini?')">
+                                                <i class="bi bi-check-all me-1"></i> Ubah Status
                                             </button>
-                                        {% elif report.status == 'RESOLVED' %}
+                                            {% elif report.status == 'RESOLVED' %}
                                             <button type="button" class="btn btn-sm btn-success rounded-pill px-3 disabled">
                                                 <i class="bi bi-check-circle-fill me-1"></i> Selesai
                                             </button>
+                                            {% else %}
+                                            <span class="text-secondary small">-</span>
+                                            {% endif %}
+                                        </form>
+                                    {% elif report.reporter == user %}
+                                        {% if report.status == 'DRAFT' %}
+                                        <div class="d-flex justify-content-end gap-3">
+                                            <a href="{% url 'main_app:update_report' report.pk %}" class="text-warning text-decoration-none" onclick="return confirm('Edit data laporan ini?')">
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </a>
+                                            <a href="{% url 'main_app:delete_report' report.pk %}" class="text-danger text-decoration-none" onclick="return confirm('Yakin ingin menghapus laporan ini?')">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </a>
+                                        </div>
+                                        {% else %}
+                                        <span class="text-secondary small">Diproses</span>
                                         {% endif %}
-                                    </form>
+                                    {% else %}
+                                        <span class="text-secondary small">-</span>
+                                    {% endif %}
                                 </td>
-                                <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-3">
-                                        <a href="{% url 'main_app:update_report' report.pk %}" class="text-warning text-decoration-none" onclick="return confirm('Edit data laporan ini?')">
-                                            <i class="bi bi-pencil-square"></i> Edit
-                                        </a>
-                                        <a href="{% url 'main_app:delete_report' report.pk %}" class="text-danger text-decoration-none" onclick="return confirm('Yakin ingin menghapus laporan ini?')">
-                                            <i class="bi bi-trash"></i> Hapus
-                                        </a>
-                                    </div>
-                                </td>
-                                {% endif %}
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" class="text-center py-5 text-secondary fs-5">Belum ada laporan infrastruktur.</td></tr>
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-secondary fs-5">
+                                    Belum ada laporan infrastruktur.
+                                </td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -193,15 +207,20 @@
                         <div class="icon-box text-success"><i class="bi bi-whatsapp"></i></div>
                         <h3 class="fw-bold">WhatsApp</h3>
                         <p class="text-secondary mb-4">Layanan pengaduan cepat via pesan instan langsung ke admin.</p>
-                        <a href="https://wa.me/6281372648776" target="_blank" class="btn btn-success rounded-pill px-5 fw-bold">Chat 0813-7264-8776</a>
+                        <a href="https://wa.me/6281372648776" target="_blank" class="btn btn-success rounded-pill px-5 fw-bold">
+                            Chat 0813-7264-8776
+                        </a>
                     </div>
                 </div>
+
                 <div class="col-md-6">
                     <div class="contact-card shadow">
                         <div class="icon-box text-info"><i class="bi bi-envelope-at"></i></div>
                         <h3 class="fw-bold">Email Official</h3>
                         <p class="text-secondary mb-4">Kirimkan proposal resmi atau kritik saran secara formal.</p>
-                        <a href="mailto:smartvillage@gmail.com" class="btn btn-info text-white rounded-pill px-5 fw-bold shadow">smartvillage@gmail.com</a>
+                        <a href="mailto:smartvillage@gmail.com" class="btn btn-info text-white rounded-pill px-5 fw-bold shadow">
+                            smartvillage@gmail.com
+                        </a>
                     </div>
                 </div>
             </div>

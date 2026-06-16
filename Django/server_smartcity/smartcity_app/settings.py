@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-_hm3pf7ods&p)74=t7n-hbyi&0&f=45e(1(*z4jetv6@_=ar+k'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # Mengizinkan server diakses dari host/IP mana pun selama praktikum
 
 # --- APPLICATION DEFINITION ---
 INSTALLED_APPS = [
@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Lab 11 Tambahan Baru: Library Pengatur CORS (Mengizinkan komunikasi lintas port)
-    'corsheaders',
+    'corsheaders',  # Pastikan ini ada
     
     # Lab 9 & 10 Tambahan REST Framework
     'rest_framework',
@@ -40,7 +40,7 @@ AUTH_USER_MODEL = 'usermanagement_24782001.User'
 
 MIDDLEWARE = [
     # Lab 11 Tambahan Baru: WAJIB diletakkan di urutan paling atas sebelum CommonMiddleware!
-    'corsheaders.middleware.CorsMiddleware',  
+    'corsheaders.middleware.CorsMiddleware',  # Harus di paling atas / sebelum CommonMiddleware
     
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -51,7 +51,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = '_24782001_iet_2026.urls'
+# pastikan ROOT_URLCONF mengarah ke package yang benar
+ROOT_URLCONF = 'smartcity_app.urls'
+
+# pastikan WSGI_APPLICATION mengarah ke modul wsgi yang benar
+WSGI_APPLICATION = 'smartcity_app.wsgi.application'
 
 # --- TEMPLATES CONFIGURATION ---
 TEMPLATES = [
@@ -69,8 +73,6 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = '_24782001_iet_2026.wsgi.application'
 
 # --- DATABASE CONFIGURATION ---
 DATABASES = {
@@ -93,6 +95,9 @@ USE_TZ = True
 # Static files
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static'] 
+
+# Menentukan folder tempat mengumpulkan file statis (untuk tampilan Django Admin/DRF)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Redirects
 LOGIN_REDIRECT_URL = 'main_app:home'

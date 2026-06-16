@@ -13,35 +13,29 @@ let editingReportId = null;
 async function loadDashboardData(tab = currentTab, page = currentPage) {
     currentTab = tab;
     currentPage = page;
-    const response = await requestAPI(`/api/report/?tab=${encodeURIComponent(currentTab)}&page=${encodeURIComponent(currentPage)}`, 'GET');
-
-    // optional: tampilkan indikator loading jika ada elemen dengan id 'loadingBar'
+    
     const loadingEl = document.getElementById('loadingBar');
     if (loadingEl) loadingEl.style.display = 'block';
 
+    const response = await requestAPI(`/api/report/?tab=${encodeURIComponent(currentTab)}&page=${encodeURIComponent(currentPage)}`, 'GET');
+
     try {
         if (response && response.status === 200) {
-            // Ekstraksi data paginasi (defensive)
             const data = response.data || {};
             const { results = [], count = 0 } = data;
 
-            // Simpan array data laporan ke global allReports
             allReports = Array.isArray(results) ? results : [];
 
-            // Hitung totalPages berdasarkan count dan page_size = 10
             const pageSize = 10;
             totalPages = Math.max(1, Math.ceil((count || 0) / pageSize));
 
-            // Pastikan currentPage berada pada rentang yang valid
             if (currentPage > totalPages) currentPage = totalPages;
             if (currentPage < 1) currentPage = 1;
 
-            // Perbarui UI
             renderList();
             renderPagination();
             await loadSummaryStats();
         } else {
-            // API gagal / respons bukan 200
             const listContainer = document.getElementById('listContainer');
             if (listContainer) {
                 listContainer.innerHTML = `
@@ -74,56 +68,7 @@ async function loadDashboardData(tab = currentTab, page = currentPage) {
 }
 
 // =====================================================================
-// 2. RENDER LIST (Menampilkan Kartu Laporan)
-// =====================================================================
-function renderList() {
-    console.log('renderList called, allReports length=', Array.isArray(allReports) ? allReports.length : allReports);
-    const listContainer = document.getElementById('listContainer');
-    if (!listContainer) {
-        console.error('renderList: listContainer not found (check element id)');
-        return;
-    }
-
-    if (!Array.isArray(allReports) || allReports.length === 0) {
-        listContainer.innerHTML = `
-            <div class="col-12 text-center py-5 text-muted">
-                <i class="bi bi-inbox fs-1 mb-3"></i>
-                <h5>Tidak ada laporan</h5>
-                <p class="mb-0">Klik "Laporan Baru" untuk membuat laporan pertama Anda.</p>
-            </div>
-        `;
-        return;
-    }
-
-    let htmlContent = '';
-    allReports.forEach(report => {
-        let badgeColor = report.status === 'DRAFT' ? 'bg-warning text-dark' : 'bg-primary';
-        
-        htmlContent += `
-            <div class="col-12 mb-3">
-                <div class="card border-0 shadow-sm border-start border-4 ${report.status === 'DRAFT' ? 'border-warning' : 'border-primary'}">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge ${badgeColor}">${report.status}</span>
-                            <small class="text-muted">${new Date(report.created_at).toLocaleDateString()}</small>
-                        </div>
-                        <h5 class="card-title fw-bold">${report.title}</h5>
-                        <p class="card-text text-secondary">${report.description}</p>
-                        <hr>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted small"><i class="bi bi-geo-alt"></i> ${report.location}</span>
-                            ${report.is_owner && report.status === 'DRAFT' ? 
-                              `<button class="btn btn-sm btn-outline-warning" onclick="editDraft(${report.id})">Edit</button>` : ''}
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-    });
-    listContainer.innerHTML = htmlContent;
-}
-
-// =====================================================================
-// 3. STATISTIK SIDEBAR
+// 2. LOAD SUMMARY STATS
 // =====================================================================
 async function loadSummaryStats() {
     try {
@@ -134,7 +79,6 @@ async function loadSummaryStats() {
             ? response.data.results
             : [];
 
-        // Hitung rekap berdasarkan status
         const draftCount = results.filter(r => String(r.status).toUpperCase() === 'DRAFT').length;
         const processCount = results.filter(r => {
             const s = String(r.status).toUpperCase();
@@ -144,105 +88,191 @@ async function loadSummaryStats() {
             const s = String(r.status).toUpperCase();
             return s === 'RESOLVED' || s === 'DONE' || s === 'COMPLETED' || s === 'SELESAI';
         }).length;
+        const reportedCount = results.filter(r => String(r.status).toUpperCase() === 'REPORTED').length;
+        const verifiedCount = results.filter(r => String(r.status).toUpperCase() === 'VERIFIED').length;
 
-        const elDraft = document.getElementById('countDraft');
-        if (elDraft) elDraft.textContent = draftCount;
-        const elProcess = document.getElementById('countProcess');
-        if (elProcess) elProcess.textContent = processCount;
-        const elResolved = document.getElementById('countResolved');
-        if (elResolved) elResolved.textContent = resolvedCount;
+        // Update semua ID statistik
+        const statIds = {
+            'statDraft': draftCount,
+            'statReported': reportedCount,
+            'statVerified': verifiedCount,
+            'statInProgress': processCount,
+            'statResolved': resolvedCount
+        };
+
+        Object.entries(statIds).forEach(([id, value]) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        });
+
     } catch (err) {
         console.error('loadSummaryStats error:', err);
     }
 }
 
-// Fungsi untuk mengisi modal dengan data draft yang akan diedit
+// =====================================================================
+// 3. RENDER LIST
+// =====================================================================
+function renderList() {
+    console.log('renderList called, allReports length=', Array.isArray(allReports) ? allReports.length : allReports);
+    const listContainer = document.getElementById('listContainer');
+    if (!listContainer) {
+        console.error('renderList: listContainer not found');
+        return;
+    }
+
+    if (!Array.isArray(allReports) || allReports.length === 0) {
+        listContainer.innerHTML = `
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 mb-3" style="color: var(--accent-teal)"></i>
+                <h5>Tidak ada laporan</h5>
+                <p class="mb-0">Klik "+ Laporan Baru" untuk membuat laporan pertama Anda.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let htmlContent = '';
+    allReports.forEach(report => {
+        let badgeClass = 'bg-primary';
+        const currentStatus = String(report.status).toUpperCase();
+
+        if (currentStatus === 'DRAFT') badgeClass = 'bg-warning text-dark';
+        else if (currentStatus === 'REPORTED') badgeClass = 'bg-info text-dark';
+        else if (currentStatus === 'RESOLVED' || currentStatus === 'SELESAI') badgeClass = 'bg-success';
+
+        htmlContent += `
+            <div class="col-12 mb-3">
+                <div class="card border-0 shadow-sm border-start border-4 ${currentStatus === 'DRAFT' ? 'border-warning' : 'border-primary'}" style="background-color: var(--card-bg) !important;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge ${badgeClass}">${report.status}</span>
+                            <small class="text-muted">${new Date(report.created_at).toLocaleDateString()}</small>
+                        </div>
+                        <h5 class="card-title fw-bold" style="color: var(--text-main) !important;">${report.title}</h5>
+                        <p class="card-text text-secondary" style="color: var(--text-muted) !important;">${report.description}</p>
+                        <hr style="border-color: var(--glass-border)">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="bi bi-geo-alt me-1" style="color: var(--accent-teal)"></i>${report.location}</span>
+                            ${report.is_owner && currentStatus === 'DRAFT' ? 
+                              `<button class="btn btn-sm btn-outline-warning" onclick="editDraft(${report.id})"><i class="bi bi-pencil-square me-1"></i>Edit</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    });
+    listContainer.innerHTML = htmlContent;
+}
+
+// =====================================================================
+// 4. EDIT DRAFT
+// =====================================================================
 async function editDraft(id) {
     if (!id) return;
     const response = await requestAPI(`/api/report/${id}`, 'GET');
     if (response && response.status === 200 && response.data) {
         const data = response.data;
-        const t = document.getElementById('reportTitle');
-        if (t) t.value = data.title || '';
-        const c = document.getElementById('reportCategory');
-        if (c) c.value = data.category || '';
-        const d = document.getElementById('reportDescription');
-        if (d) d.value = data.description || '';
-        const l = document.getElementById('reportLocation');
-        if (l) l.value = data.location || '';
+        
+        document.getElementById('reportTitle').value = data.title || '';
+        document.getElementById('reportCategory').value = data.category || '';
+        document.getElementById('reportDescription').value = data.description || '';
+        document.getElementById('reportLocation').value = data.location || '';
 
         editingReportId = id;
 
+        const modalTitle = document.getElementById('reportModalLabel');
+        if (modalTitle) modalTitle.innerHTML = `<i class="bi bi-pencil-square me-2" style="color: var(--accent-teal)"></i>Edit Draft Laporan`;
+
         const modalEl = document.getElementById('reportModal');
-        if (modalEl) new bootstrap.Modal(modalEl).show();
+        if (modalEl) {
+            const modalInstance = new bootstrap.Modal(modalEl);
+            modalInstance.show();
+        }
     } else {
         console.error('Gagal memuat data draft untuk edit', response);
     }
 }
 
 // =====================================================================
-// 4. SUBMIT HANDLER (Hanya SATU Fungsi Utama & Valid)
+// 5. SUBMIT HANDLER
 // =====================================================================
 async function handleReportSubmit(targetStatus = 'REPORTED') {
     console.log('handleReportSubmit triggered, targetStatus =', targetStatus);
 
     const payload = {
-        title: document.getElementById('reportTitle').value,
+        title: document.getElementById('reportTitle').value.trim(),
         category: document.getElementById('reportCategory').value,
-        description: document.getElementById('reportDescription').value,
-        location: document.getElementById('reportLocation').value,
-        status: targetStatus
+        description: document.getElementById('reportDescription').value.trim(),
+        location: document.getElementById('reportLocation').value.trim(),
+        // Kita tetap kirim status yang diinginkan user
+        status: targetStatus 
     };
 
-    let response;
-
-    if (editingReportId === null) {
-        response = await requestAPI('report', 'POST', payload);
-    } else {
-        response = await requestAPI(`report/${editingReportId}`, 'PUT', payload);
+    if (!payload.title || !payload.description || !payload.location) {
+        alert('Harap lengkapi seluruh formulir laporan!');
+        return;
     }
 
-    if (response && (response.status === 201 || response.status === 200)) {
-        console.log('Submit Success Response:', response);
-
-        // Notifikasi Sukses Dinamis
-        if (editingReportId !== null) {
-            alert('Laporan berhasil diperbarui!');
+    let response;
+    try {
+        // 1. Kirim data ke server
+        if (editingReportId === null) {
+            response = await requestAPI('report', 'POST', payload);
         } else {
-            alert(
-                targetStatus === 'DRAFT'
-                    ? 'Draft berhasil disimpan!'
-                    : 'Laporan berhasil diajukan!'
-            );
+            response = await requestAPI(`report/${editingReportId}`, 'PUT', payload);
         }
 
-        // Sembunyikan Modal Bootstrap secara aman
-        const modalEl = document.getElementById('reportModal');
-        if (modalEl) {
-            const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-            modalInstance.hide();
+        console.log('Server Response:', response);
+
+        if (response && (response.status === 201 || response.status === 200)) {
+            const returnedData = response.data;
+            const returnedStatus = returnedData?.status?.toUpperCase();
+
+            // 2. DETEKSI MASALAH STATUS DRAFT
+            // Jika user minta DRAFT tapi server baliknya REPORTED
+            if (targetStatus === 'DRAFT' && returnedStatus === 'REPORTED') {
+                console.warn('⚠️ Server memaksa status jadi REPORTED. Melakukan fix otomatis...');
+                
+                // Ambil ID laporan yang baru saja dibuat
+                const newReportId = returnedData.id || editingReportId;
+                
+                if (newReportId) {
+                    // 3. KIRIM UPDATE KHUSUS UNTUK MENGEMBALIKAN KE DRAFT
+                    await requestAPI(`report/${newReportId}`, 'PATCH', { status: 'DRAFT' });
+                    console.log('✅ Status berhasil diperbaiki menjadi DRAFT di server.');
+                }
+            }
+
+            alert(editingReportId !== null ? 'Laporan berhasil diperbarui!' : (targetStatus === 'DRAFT' ? 'Draft berhasil disimpan!' : 'Laporan berhasil diajukan!'));
+
+            // Tutup Modal & Reset Form
+            const modalEl = document.getElementById('reportModal');
+            if (modalEl) {
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) modalInstance.hide();
+            }
+
+            document.getElementById('reportForm')?.reset();
+            editingReportId = null;
+
+            const modalTitle = document.getElementById('reportModalLabel');
+            if (modalTitle) modalTitle.innerHTML = `<i class="bi bi-pencil-square me-2" style="color: var(--accent-teal)"></i>Buat Laporan Baru`;
+
+            // Refresh Dashboard
+            await loadDashboardData(currentTab, 1);
+
+        } else {
+            console.error('Submit failed:', response);
+            alert('Gagal menyimpan laporan. Sila periksa kembali isian Anda.');
         }
-
-        // Reset Formulir Laporan
-        document.getElementById('reportForm')?.reset();
-
-        // Kembalikan status ID edit ke null
-        editingReportId = null;
-
-        // Refresh Data Dashboard (Kembali ke halaman 1 agar data baru langsung kelihatan)
-        await loadDashboardData(currentTab, 1);
-
-    } else {
-        console.error('Submit failed:', response);
-        alert(
-            'Gagal menyimpan:\n' +
-            JSON.stringify(response?.data || response?.error || 'Unknown Error')
-        );
+    } catch (err) {
+        console.error('Error during submit:', err);
+        alert('Terjadi kesalahan jaringan saat menyimpan laporan.');
     }
 }
 
 // =====================================================================
-// 5. PAGINASI
+// 6. PAGINASI
 // =====================================================================
 function renderPagination() {
     const container = document.getElementById('paginationContainer');
@@ -256,25 +286,8 @@ function renderPagination() {
     container.innerHTML = html;
 }
 
-// Tambahkan fungsi inisialisasi tombol laporan (dipanggil setelah dashboard dirender)
-function initializeReportButtons() {
-    const btnDraft = document.getElementById('btnDraft');
-    if (btnDraft) {
-        btnDraft.onclick = () => {
-            handleReportSubmit('DRAFT');
-        };
-    }
-
-    const btnSubmit = document.getElementById('btnSubmit');
-    if (btnSubmit) {
-        btnSubmit.onclick = () => {
-            handleReportSubmit('REPORTED');
-        };
-    }
-}
-
 // =====================================================================
-// API REQUESTS
+// 7. API HELPER
 // =====================================================================
 const API_BASE = 'http://127.0.0.1:8000';
 function getAccessToken(){ return localStorage.getItem('access_token'); }
@@ -293,56 +306,24 @@ async function requestAPI(path, method='GET', body=null){
     .catch(err => ({ status:0, error: err }));
 }
 
-// Handler login
-async function handleLogin() {
-    const username = (document.getElementById('username')||{}).value || '';
-    const password = (document.getElementById('password')||{}).value || '';
-    if (!username || !password) { alert('Isi username & password'); return; }
-
-    const resp = await requestAPI(LOGIN_URL, 'POST', { username, password });
-
-    if (resp && (resp.status === 200 || resp.status === 204 || resp.status === 201)) {
-        await loadDashboardData('my_reports', 1);
-        if (location.hash !== '#/dashboard') location.hash = '#/dashboard';
-    } else {
-        console.error('Login gagal', resp);
-        alert('Login gagal: periksa username/password atau lihat console network');
-    }
-}
-
-// Bind tombol login
-const btnLogin = document.getElementById('btnLogin');
-if (btnLogin) btnLogin.addEventListener('click', handleLogin);
-
-// Routing logic
-function handleRouteChange() {
-    const hash = window.location.hash || '#/dashboard';
-    if (hash.startsWith('#/dashboard')) {
-        // pastikan tombol inisialisasi dipanggil setelah loadDashboardData selesai
-        loadDashboardData('my_reports', 1).finally(() => {
-            initializeReportButtons();
-        });
-    }
-}
-
-window.addEventListener('hashchange', handleRouteChange);
-window.addEventListener('DOMContentLoaded', handleRouteChange);
-
 // =====================================================================
-// DOM EVENT LISTENERS (Inisialisasi Event setelah DOM Siap)
+// 8. INITIALIZATION
 // =====================================================================
 window.addEventListener('DOMContentLoaded', () => {
-    // Tombol ajukan / submit default
-    const btn = document.getElementById('btnSubmit');
-    if (btn) btn.addEventListener('click', () => handleReportSubmit('REPORTED'));
+    // Setup event listener untuk tombol di dalam modal
+    const btnDraft = document.getElementById('btnDraft');
+    if (btnDraft) {
+        btnDraft.onclick = (e) => { e.preventDefault(); handleReportSubmit('DRAFT'); };
+    }
 
-    // Pencegahan default submit jika menggunakan form element HTML
+    const btnSubmit = document.getElementById('btnSubmit');
+    if (btnSubmit) {
+        btnSubmit.onclick = (e) => { e.preventDefault(); handleReportSubmit('REPORTED'); };
+    }
+
+    // Cegah default action submit bawaan browser form
     const form = document.getElementById('reportForm');
     if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Default behavior diarahkan ke REPORTED jika ditekan via Enter form
-            handleReportSubmit('REPORTED');
-        });
+        form.addEventListener('submit', (e) => e.preventDefault());
     }
 });
