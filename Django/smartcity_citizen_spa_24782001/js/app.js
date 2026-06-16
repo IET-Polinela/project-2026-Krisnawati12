@@ -302,6 +302,6 @@ window.addEventListener('DOMContentLoaded', () => {
     // Cegah default action submit bawaan browser form
     const form = document.getElementById('reportForm');
     if (form) {
-        form.addEventListener('submit', (e) => e.preventDefault();
+        form.addEventListener('submit', (e) => e.preventDefault());
     }
 });
