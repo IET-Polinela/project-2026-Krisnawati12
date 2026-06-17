@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     
     # Lab 9 & 10 Tambahan REST Framework
     'rest_framework',
-    'rest_framework_simplejwt', 
+    'drf_spectacular',       # ← TAMBAH INI
+    'django_scalar',         # ← TAMBAH INI
     
     # Aplikasi Utama & Tugas Kelompokmu
     'main_app',
@@ -114,8 +115,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication'
-    )
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # ----------------------------------------------------------------------
@@ -127,3 +128,10 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:5500"]
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Smart City Portal API',
+    'DESCRIPTION': 'Dokumentasi REST API resmi untuk Portal Pelaporan Laporan Warga',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
