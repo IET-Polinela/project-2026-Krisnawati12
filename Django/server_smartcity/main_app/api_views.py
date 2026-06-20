@@ -1,6 +1,7 @@
 from rest_framework import viewsets, pagination, permissions
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db.models import Q
+from drf_spectacular.utils import extend_schema
 from .models import Report
 from .serializers import ReportSerializer
 
@@ -68,3 +69,7 @@ class ReportViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save()
+
+    @extend_schema(exclude=True)
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
